@@ -8,6 +8,7 @@
     }],
     "type": "modul",
     "require": {
-        "php": ">=5.4"
+        "php": ">=5.4",
+        "phpoffice/phpexcel": "dev-master"
     }
 }
