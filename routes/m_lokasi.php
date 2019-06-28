@@ -3,10 +3,8 @@
 function validasi($data, $custom = array())
 {
     $validasi = array(
-//        'parent_id' => 'required',
-//        'kode'      => 'required',
-//        'nama'      => 'required',
-        // 'tipe' => 'required',
+        'kode'      => 'required',
+        'nama'      => 'required',
     );
 //    GUMP::set_field_name("parent_id", "Akun");
     $cek = validate($data, $validasi, $custom);
@@ -18,6 +16,7 @@ $app->get('/acc/m_lokasi/getLokasi', function ($request, $response) {
     $models = $db->select("*")
                 ->from("m_lokasi")
                 ->orderBy('m_lokasi.nama')
+                ->where("is_deleted", "=", 0)
                 ->findAll();
     return successResponse($response, [
       'list'        => $models
@@ -33,7 +32,8 @@ $app->get('/acc/m_lokasi/index', function ($request, $response) {
     $db = $this->db;
     $db->select("*")
         ->from("m_lokasi")
-        ->orderBy('m_lokasi.nama');
+        ->orderBy('m_lokasi.nama')
+        ->where("is_deleted", "=", 1);
 
     if (isset($params['filter'])) {
         $filter = (array) json_decode($params['filter']);

@@ -8,7 +8,9 @@
 function validasi($data, $custom = array())
 {
     $validasi = array(
-//        "nama" => "required",
+        "kode" => "required",
+        "nama" => "required",
+        "tipe" => "required"
     );
     $cek = validate($data, $validasi, $custom);
     return $cek;
@@ -62,7 +64,7 @@ $app->get('/acc/m_klasifikasi/index', function ($request, $response) {
     // }
 
     $filter = array();
-    $sort = "m_akun.kode ASC";
+    $sort = "acc_m_akun.kode ASC";
     $offset = 0;
     $limit = 1000;
 
@@ -75,13 +77,13 @@ $app->get('/acc/m_klasifikasi/index', function ($request, $response) {
     }
 
     $db = $this->db;
-    $db->select("m_akun.*")
-        ->from('m_akun')
+    $db->select("acc_m_akun.*")
+        ->from('acc_m_akun')
         ->limit($limit)
         ->orderBy($sort)
         ->offset($offset)
         ->where('is_tipe', '=', '1')
-        ->orderBy('m_akun.kode ASC');
+        ->orderBy('acc_m_akun.kode ASC');
 
 
 
@@ -160,6 +162,7 @@ $app->get('/acc/m_klasifikasi/list', function ($request, $response){
 $app->post('/acc/m_klasifikasi/create', function ($request, $response) {
 
     $data = $request->getParams();
+//    print_r($data);die();
 
     $db = $this->db;
     $data['tipe'] = isset($data['tipe']) ? $data['tipe'] : '';
@@ -282,6 +285,7 @@ $app->post('/acc/m_klasifikasi/import', function ($request, $response) {
                 $id = $objPHPExcel->getSheet(0)->getCell('A' . $row)->getValue();
                 $kode = $objPHPExcel->getSheet(0)->getCell('B' . $row)->getValue();
                 if (isset($kode) && isset($id)) {
+                    $db->select("*")->from("m_akun")->where("id", "=", $id);
                     $data['id'] = $id;
                     $data['kode'] = $kode;
                     $data['nama'] = $objPHPExcel->getSheet(0)->getCell('C' . $row)->getValue();
@@ -291,7 +295,13 @@ $app->post('/acc/m_klasifikasi/import', function ($request, $response) {
                     $data['is_tipe'] = 1;
                     $data['is_deleted'] = 0;
                     $tes[] = $data;
-                   $insert = $db->insert("m_akun", $data);
+                    $cekid = $db->select("*")->from("m_akun")->where("id", "=", $id)->find();
+                    if($cekid){
+                        $update = $db->update("m_akun", $data, ["id"=>$id]);
+                    }else{
+                        $insert = $db->insert("m_akun", $data);
+                    }
+                   
                 }
             }
             unlink($inputFileName);
@@ -308,7 +318,7 @@ $app->post('/acc/m_klasifikasi/import', function ($request, $response) {
  */
 $app->get('/acc/m_klasifikasi/export', function ($request, $response) {
 
-    $inputFileName = 'upload/format/format_tipeakun.xls';
+    $inputFileName = 'acc/landa-acc//upload/format_tipeakun.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($inputFileName);
 

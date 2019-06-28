@@ -25,6 +25,7 @@
                                         <label class="col-sm-1 col-form-label-sm mb-0px">Lokasi</label>
                                         <div class="col-sm-2">
                                             <select class="form-control form-control-sm" st-search="m_lokasi_id">
+                                                <option value="">- Semua Lokasi -</option>
                                                 <option ng-repeat="val in listLokasi" ng-value="val.id">{{val.nama}}</option>
                                             </select>
                                         </div>
@@ -124,8 +125,8 @@
                         <div class="col-md-4">
                             <div class="col-md-12">
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label-sm required">Lokasi</label>
-                                            <div class="col-sm-9">
+                                            <label class="col-sm-4 col-form-label-sm required">Lokasi</label>
+                                            <div class="col-sm-8">
                                                 <ui-select class="ui-select-sm ui-select-container" ng-change="kode(form.m_lokasi_id)" ng-model="form.m_lokasi_id" theme="bootstrap" ng-disabled="is_view">
                                                     <ui-select-match placeholder="Pilih Lokasi">
                                                         {{ $select.selected.kode + " - " + $select.selected.nama}}
@@ -137,16 +138,16 @@
                                     </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">No Transaksi</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control form-control-sm" ng-model="form.no_transaksi" ng-disabled="is_view" required/>
+                                    <label class="col-sm-4 col-form-label-sm required">No Transaksi</label>
+                                    <div class="col-sm-8">
+                                        <input ng-disabled="true" type="text" class="form-control form-control-sm" ng-model="form.no_transaksi" ng-disabled="is_view" required/>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">Keterangan</label>
-                                    <div class="col-sm-9">
+                                    <label class="col-sm-4 col-form-label-sm">Keterangan</label>
+                                    <div class="col-sm-8">
                                         <textarea class="form-control" ng-model="form.keterangan"></textarea>
                                     </div>
                                 </div>
@@ -155,14 +156,14 @@
                         <div class="col-md-4">
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">Nominal</label>
+                                    <label class="col-sm-3 col-form-label-sm required">Nominal</label>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-sm">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">Rp</span>
                                             </div>
 
-                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka" maxlength="12" ng-disabled="is_view" ng-model="form.total"/>
+                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka rp" maxlength="12" ng-disabled="is_view" ng-model="form.total"/>
                                         </div>
                                     </div>
 
@@ -170,7 +171,7 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">Tanggal</label>
+                                    <label class="col-sm-3 col-form-label-sm required">Tanggal</label>
                                     <div class="col-sm-9">
                                         <div class="input-group">
                                             <input type="text" class="form-control form-control-sm" ng-click="toggle($event, 'tanggal')"  is-open="opened.tanggal" uib-datepicker-popup="dd-MM-yyyy" ng-model="form.tanggal" ng-disabled="is_view"/>
@@ -188,7 +189,7 @@
                         <div class="col-md-4">
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-4 col-form-label-sm">Keluar Dari</label>
+                                    <label class="col-sm-4 col-form-label-sm required">Keluar Dari</label>
                                     <div class="col-sm-8">
                                         <ui-select class="ui-select-sm" ng-model="form.m_akun_asal_id" theme="bootstrap" ng-disabled="is_view">
                                             <ui-select-match placeholder="Pilih Akun">
@@ -201,7 +202,7 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-4 col-form-label-sm">Masuk Ke</label>
+                                    <label class="col-sm-4 col-form-label-sm required">Masuk Ke</label>
                                     <div class="col-sm-8">
                                         <ui-select class="ui-select-sm" ng-model="form.m_akun_tujuan_id" theme="bootstrap" ng-disabled="is_view">
                                             <ui-select-match placeholder="Pilih Akun">

@@ -117,10 +117,10 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm required">Induk</label>
+                                <label class="col-sm-3 col-form-label-sm">Induk</label>
                                 <div class="col-sm-9">
                                     <select class="form-control form-control-sm" ng-change="getakun(form.parent_id)" id="parent" ng-disabled="is_view" ng-model="form.parent_id">
-                                        <option value="">
+                                        <option value="0" ng-selected="value.id == form.parent_id">
                                             - Pilih Induk -
                                         </option>
                                         <option ng-repeat="value in parent" ng-selected="value.id == form.parent_id" ng-value="{{value.id}}">
@@ -133,7 +133,20 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm">Klasifikasi</label>
+                                <label class="col-sm-3 col-form-label-sm required">Kode Akun</label>
+                                <div class="col-sm-9">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">{{form.kode_induk}}</span>
+                                        </div>
+                                        <input type="text" style="text-align:left" class="form-control form-control-sm angka" ng-model="form.kode" ng-disabled="is_view" required/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label-sm required">Klasifikasi</label>
                                 <div class="col-sm-9">
                                     <select class="form-control form-control-sm" id="klasifikasi" ng-disabled="is_view" ng-model="form.tipe">
                                         <option value="">
@@ -196,28 +209,20 @@
                                         <option value="Modal">
                                             Modal
                                         </option>
-
-
+                                        <option value="Akumulasi Penyusutan Aset">
+                                            Akumulasi Penyusutan Aset
+                                        </option>    
+                                        <option value="Beban Penyusutan Aset">
+                                            Beban Penyusutan Aset
+                                        </option>  
                                     </select>
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="col-md-6">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm">Kode Akun</label>
-                                <div class="col-sm-9">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">{{form.kode_induk}}</span>
-                                        </div>
-                                        <input type="text" class="form-control form-control-sm angka" ng-model="form.kode" ng-disabled="is_view" required/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm">Nama Akun</label>
+                                <label class="col-sm-3 col-form-label-sm required">Nama Akun</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control form-control-sm" ng-model="form.nama" ng-disabled="is_view" required/>
                                 </div>
@@ -225,7 +230,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm required">Tipe Arus Kas</label>
+                                <label class="col-sm-3 col-form-label-sm">Tipe Arus Kas</label>
                                 <div class="col-sm-9">
                                     <select class="form-control form-control-sm" id="tipearus" ng-disabled="is_view" ng-model="form.tipe_arus">
 

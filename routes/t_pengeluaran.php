@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('Asia/Jakarta');
+
 $app->post('/acc/t_pengeluaran/upload/{folder}', function ($request, $response) {
     $folder = $request->getAttribute('folder');
     $params = $request->getParams();
@@ -63,14 +65,19 @@ $app->post('/acc/t_pengeluaran/removegambar', function ($request, $response) {
 function validasi($data, $custom = array())
 {
     $validasi = array(
-//        'no_transaksi' => 'required',
-//        'm_lokasi_id'      => 'required',
-//        'm_akun_id' => 'required',
-//        'tanggal'      => 'required',
-//         'total' => 'required',
-//        'dibayar_kepada' => 'required'
+        'no_transaksi' => 'required',
+        'm_lokasi_id'      => 'required',
+        'm_akun_id' => 'required',
+        'tanggal'      => 'required',
+        'total' => 'required',
+//        'dibayar_kepada' => 'required',
+        'm_supplier_id' => 'required'
     );
-//    GUMP::set_field_name("parent_id", "Akun");
+    GUMP::set_field_name("m_lokasi_id", "Lokasi");
+    GUMP::set_field_name("m_akun_id", "Keluar dari");
+//    GUMP::set_field_name("dibayar_kepada", "Dibayar kepada");
+    GUMP::set_field_name("total", "Detail");
+    GUMP::set_field_name("m_supplier_id", "Supplier");
     $cek = validate($data, $validasi, $custom);
     return $cek;
 }
@@ -113,12 +120,14 @@ $app->get('/acc/t_pengeluaran/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_pengeluaran.*, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
+    $db->select("acc_pengeluaran.*, m_supplier.nama as namaSupplier, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
         ->from("acc_pengeluaran")
+        ->join("join", "m_supplier", "acc_pengeluaran.m_supplier_id = m_supplier.id")
         ->join("join", "m_user", "acc_pengeluaran.created_by = m_user.id")
         ->join("join", "m_akun", "acc_pengeluaran.m_akun_id = m_akun.id")
         ->join("join", "m_lokasi", "m_lokasi.id = acc_pengeluaran.m_lokasi_id")
-        ->orderBy('acc_pengeluaran.no_urut');
+        ->orderBy('acc_pengeluaran.tanggal DESC')
+        ->orderBy('acc_pengeluaran.created_at DESC');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);
 
     if (isset($params['filter'])) {
@@ -148,9 +157,11 @@ $app->get('/acc/t_pengeluaran/index', function ($request, $response) {
     
     foreach($models as $key => $val){
         $models[$key] = (array) $val;
-        $models[$key]['created_at'] = date("Y-m-d h:i:s",$val->created_at);
+        $models[$key]['tanggal'] = date("d-m-Y h:i:s",strtotime($val->tanggal));
+        $models[$key]['created_at'] = date("d-m-Y h:i:s",$val->created_at);
         $models[$key]['m_akun_id'] = ["id" => $val->m_akun_id, "nama" => $val->namaAkun, "kode" => $val->kodeAkun];
         $models[$key]['m_lokasi_id'] = ["id" => $val->m_lokasi_id, "nama" => $val->namaLokasi, "kode" => $val->kodeLokasi];
+        $models[$key]['m_supplier_id'] = ["id" => $val->m_supplier_id, "nama" => $val->namaSupplier];
     }
 //     print_r($models);exit();
 //    die();
@@ -170,7 +181,7 @@ $app->post('/acc/t_pengeluaran/create', function ($request, $response) {
     $data   = $params;
 //    print_r($data);die();
     $sql = $this->db;
-    $validasi = validasi($data);
+    $validasi = validasi($data['form']);
     if ($validasi === true) {
         $getNoUrut = $sql->select("*")->from("acc_pengeluaran")->orderBy("no_urut DESC")->find();
         $insert['no_urut'] = 1;
@@ -181,15 +192,18 @@ $app->post('/acc/t_pengeluaran/create', function ($request, $response) {
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
         $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert['m_akun_id'] = $data['form']['m_akun_id']['id'];
-        $insert['dibayar_kepada'] = $data['form']['dibayar_kepada'];
+        $insert['m_supplier_id'] = $data['form']['m_supplier_id']['id'];
+        $insert['dibayar_kepada'] = (isset($data['form']['dibayar_kepada']) && !empty($data['form']['dibayar_kepada']) ? $data['form']['dibayar_kepada'] : '');
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
         $insert['total'] = $data['form']['total'];
         $model = $sql->insert("acc_pengeluaran", $insert);
         
         $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert2['m_akun_id'] = $data['form']['m_akun_id']['id'];
+        $insert2['m_supplier_id'] = $data['form']['m_supplier_id']['id'];
         $insert2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert2['kredit'] = $data['form']['total'];
+        $insert2['kode'] = $data['form']['no_transaksi'];
         $insert2['reff_type'] = "Pengeluaran Header";
         $insert2['reff_id'] = $model->id;
         $model2 = $sql->insert("acc_trans_detail", $insert2);
@@ -199,13 +213,14 @@ $app->post('/acc/t_pengeluaran/create', function ($request, $response) {
                 $detail['m_akun_id'] = $val['m_akun_id']['id'];
                 $detail['debit'] = $val['debit'];
                 $detail['acc_pengeluaran_id'] = $model->id;
-                $detail['keterangan'] = $val['keterangan'];
+                $detail['keterangan'] = (isset($val['keterangan']) && !empty($val['keterangan']) ? $val['keterangan'] : '');
                 $modeldetail = $sql->insert("acc_pengeluaran_det", $detail);
                 
                 $detail2['m_akun_id'] = $val['m_akun_id']['id'];
                 $detail2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
                 $detail2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
                 $detail2['debit'] = $val['debit'];
+                $detail2['keterangan'] = (isset($val['keterangan']) && !empty($val['keterangan']) ? $val['keterangan'] : '');
                 $detail2['reff_type'] = "Pengeluaran Detail";
                 $detail2['reff_id'] = $modeldetail->id;
                 $modeldetail2 = $sql->insert("acc_trans_detail", $detail2);
@@ -224,7 +239,7 @@ $app->post('/acc/t_pengeluaran/update', function ($request, $response) {
     $data = $request->getParams();
     $sql   = $this->db;
 //    print_r($data);die();
-    $validasi = validasi($data);
+    $validasi = validasi($data['form']);
 
     if ($validasi === true) {
         
@@ -232,8 +247,9 @@ $app->post('/acc/t_pengeluaran/update', function ($request, $response) {
         $insert['no_urut'] = $data['form']['no_urut'];
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
         $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
+        $insert['m_supplier_id'] = $data['form']['m_supplier_id']['id'];
         $insert['m_akun_id'] = $data['form']['m_akun_id']['id'];
-        $insert['dibayar_kepada'] = $data['form']['dibayar_kepada'];
+        $insert['dibayar_kepada'] = (isset($data['form']['dibayar_kepada']) && !empty($data['form']['dibayar_kepada']) ? $data['form']['dibayar_kepada'] : '');
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
         $insert['total'] = $data['form']['total'];
         $model = $sql->update("acc_pengeluaran", $insert, ["id" => $data['form']['id']]);
@@ -243,6 +259,8 @@ $app->post('/acc/t_pengeluaran/update', function ($request, $response) {
         $insert2['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert2['kredit'] = $data['form']['total'];
+        $insert2['m_supplier_id'] = $data['form']['m_supplier_id']['id'];
+        $insert2['kode'] = $data['form']['no_transaksi'];
         $insert2['reff_type'] = "Pengeluaran Header";
         $insert2['reff_id'] = $model->id;
         $model2 = $sql->update("acc_trans_detail", $insert2, ["reff_id"=>$model->id, "reff_type"=>"Pengeluaran Header"]);
@@ -279,7 +297,7 @@ $app->post('/acc/t_pengeluaran/update', function ($request, $response) {
                 $detail['m_akun_id'] = $vals['m_akun_id']['id'];
                 $detail['debit'] = $vals['debit'];
                 $detail['acc_pengeluaran_id'] = $model->id;
-                $detail['keterangan'] = $vals['keterangan'];
+                $detail['keterangan'] = (isset($val['keterangan']) && !empty($val['keterangan']) ? $val['keterangan'] : '');
                 $modeldetail = $sql->insert("acc_pengeluaran_det", $detail);
                 
                 //insert ke acc_trans_detail
@@ -288,6 +306,7 @@ $app->post('/acc/t_pengeluaran/update', function ($request, $response) {
                 $detail2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
                 $detail2['debit'] = $vals['debit'];
                 $detail2['reff_type'] = "Pengeluaran Detail";
+                $detail2['keterangan'] = (isset($val['keterangan']) && !empty($val['keterangan']) ? $val['keterangan'] : '');
                 $detail2['reff_id'] = $modeldetail->id;
                 $modeldetail2 = $sql->insert("acc_trans_detail", $detail2);
             }

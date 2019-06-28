@@ -64,13 +64,16 @@ $app->post('/acc/t_jurnal_umum/removegambar', function ($request, $response) {
 function validasi($data, $custom = array())
 {
     $validasi = array(
-//        'no_transaksi' => 'required',
-//        'm_lokasi_id'      => 'required',
-//        'tanggal'      => 'required',
-//         'total_kredit' => 'required',
-//        'total_debit' => 'required'
+        'no_transaksi' => 'required',
+        'm_lokasi_id'      => 'required',
+        'tanggal'      => 'required',
+         'total_kredit' => 'required',
+        'total_debit' => 'required'
     );
-//    GUMP::set_field_name("parent_id", "Akun");
+    GUMP::set_field_name("no_transaksi", "No transaksi");
+    GUMP::set_field_name("m_lokasi_id", "Lokasi");
+    GUMP::set_field_name("total_kredit", "Total Kredit");
+    GUMP::set_field_name("total_debit", "Total Debit");
     $cek = validate($data, $validasi, $custom);
     return $cek;
 }
@@ -147,7 +150,8 @@ $app->get('/acc/t_jurnal_umum/index', function ($request, $response) {
     
     foreach($models as $key => $val){
         $models[$key] = (array) $val;
-        $models[$key]['created_at'] = date("Y-m-d h:i:s",$val->created_at);
+        $models[$key]['tanggal'] = date("d-m-Y h:i:s", strtotime($val->tanggal));
+        $models[$key]['created_at'] = date("d-m-Y h:i:s",$val->created_at);
         $models[$key]['m_lokasi_id'] = ["id"=>$val->idLokasi, "kode"=>$val->kodeLokasi, "nama"=>$val->namaLokasi];
     }
     
@@ -166,7 +170,7 @@ $app->post('/acc/t_jurnal_umum/create', function ($request, $response) {
     $data   = $params;
 //    print_r($data);die();
     $sql = $this->db;
-    $validasi = validasi($data);
+    $validasi = validasi($data['form']);
     if ($validasi === true) {
         $getNoUrut = $sql->select("*")->from("acc_jurnal")->orderBy("no_urut DESC")->find();
         $insert['no_urut'] = 1;
@@ -176,7 +180,7 @@ $app->post('/acc/t_jurnal_umum/create', function ($request, $response) {
         
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
         $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
-        $insert['keterangan'] = $data['form']['keterangan'];
+        $insert['keterangan'] = (isset($data['form']['keterangan']) && !empty($data['form']['keterangan']) ? $data['form']['keterangan'] : $data['form']['keterangan']);
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
         $insert['total_kredit'] = $data['form']['total_kredit'];
         $insert['total_debit'] = $data['form']['total_debit'];
@@ -188,7 +192,8 @@ $app->post('/acc/t_jurnal_umum/create', function ($request, $response) {
         $insert2['kredit'] = $data['form']['total_kredit'];
         $insert2['reff_type'] = "Jurnal Header";
         $insert2['reff_id'] = $model->id;
-        $insert2['keterangan'] = $data['form']['keterangan'];
+        $insert2['kode'] = $data['form']['no_transaksi'];
+        $insert2['keterangan'] = (isset($data['form']['keterangan']) && !empty($data['form']['keterangan']) ? $data['form']['keterangan'] : $data['form']['keterangan']);
         $model2 = $sql->insert("acc_trans_detail", $insert2);
 //        die();
         if ($model && $model2) {
@@ -198,7 +203,7 @@ $app->post('/acc/t_jurnal_umum/create', function ($request, $response) {
                 $detail['kredit'] = $val['kredit'];
                 $detail['debit'] = $val['debit'];
                 $detail['acc_jurnal_id'] = $model->id;
-                $detail['keterangan'] = $val['keterangan'];
+                $detail['keterangan'] = (isset($val['keterangan']) && !empty($val['keterangan'])? $val['keterangan'] : $val['keterangan']);
                 $modeldetail = $sql->insert("acc_jurnal_det", $detail);
                 
                 $detail2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
@@ -208,7 +213,7 @@ $app->post('/acc/t_jurnal_umum/create', function ($request, $response) {
                 $detail2['debit'] = $val['debit'];
                 $detail2['reff_type'] = "Jurnal Detail";
                 $detail2['reff_id'] = $modeldetail->id;
-                $detail2['keterangan'] = $val['keterangan'];
+                $detail2['keterangan'] = (isset($val['keterangan']) && !empty($val['keterangan'])? $val['keterangan'] : $val['keterangan']);
                 $modeldetail2 = $sql->insert("acc_trans_detail", $detail2);
             }
             return successResponse($response, $model);

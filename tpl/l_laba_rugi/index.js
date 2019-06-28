@@ -1,7 +1,7 @@
-app.controller('l_jurnalumumCtrl', function ($scope, Data, $rootScope, $uibModal, Upload) {
+app.controller('l_labarugiCtrl', function ($scope, Data, $rootScope, $uibModal, Upload) {
     var tableStateRef;
-    var control_link = "acc/l_jurnal_umum";
-    var master = 'Laporan Jurnal Umum';
+    var control_link = "acc/l_laba_rugi";
+    var master = 'Laporan Laba Rugi';
     $scope.master = master;
     $scope.formTitle = '';
     $scope.base_url = '';
@@ -46,7 +46,7 @@ app.controller('l_jurnalumumCtrl', function ($scope, Data, $rootScope, $uibModal
         form.tanggal.endDate = moment(form.tanggal.endDate).format('YYYY-MM-DD');
         form.tanggal.startDate = moment(form.tanggal.startDate).format('YYYY-MM-DD');
 //        console.log(form)
-        window.location = "api/acc/l_jurnal_umum/exportExcel?" + $.param(form);
+        window.location = "api/acc/l_laba_rugi/exportExcel?" + $.param(form);
     }
 
     $scope.resetAkun = function () {

@@ -100,11 +100,11 @@
 
                                 <td>
                                     <div class="btn-group pull-right" role="group" ng-show="row.is_tipe == 0">
-                                        <label class="i-checks btn-table" style="float: left;" title="Tampil Di Kasir" ng-if="row.tipe == 'Cash & Bank'">
+                                        <label class="i-checks btn-table" style="float: left; margin-top: 6px; margin-right:10px" title="Tampil Di Kasir" ng-if="row.tipe == 'Cash & Bank'">
                                             <input ng-disabled="is_view" ng-model="row.is_kasir" type="checkbox" ng-click="save_akun_kasir(row)">
                                             <i></i>
                                         </label>
-                                        <button type="button" class="btn btn-info fa fa-briefcase" ng-if="row.is_deleted == 0" ng-click="modalBudget(row)"></button>
+                                        <button type="button" class="btn btn-success fa fa-briefcase" ng-if="row.is_deleted == 0" ng-click="modalBudget(row)"></button>
                                         <button type="button" class="btn btn-info fa fa-pencil" ng-if="row.is_deleted == 0" ng-click="update(row)"></button>
                                         <button type="button" class="btn btn-danger fa fa-trash" ng-if="row.is_deleted == 0" ng-click="trash(row);"></button>
                                         <button type="button" class="btn btn-warning fa fa-refresh" ng-if="row.is_deleted == 1" ng-click="restore(row);"></button>
@@ -143,20 +143,20 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm">Kode Akun</label>
+                                <label class="col-sm-3 col-form-label-sm required">Kode Akun</label>
                                 <div class="col-sm-9">
                                     <div class="input-group input-group-sm">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">{{form.kode_induk}}</span>
                                         </div>
-                                        <input type="text" class="form-control form-control-sm angka" ng-model="form.kode" ng-disabled="is_view" required/>
+                                        <input type="text" class="form-control form-control-sm angka" style="text-align: left" ng-model="form.kode" ng-disabled="is_view" required/>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label-sm">Nama Akun</label>
+                                <label class="col-sm-3 col-form-label-sm required">Nama Akun</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control form-control-sm" ng-model="form.nama" ng-disabled="is_view" required/>
                                 </div>

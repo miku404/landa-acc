@@ -15,7 +15,7 @@ function validasi($data, $custom = array()) {
 $app->get('/acc/l_buku_besar/listakun', function ($request, $response) {
     $sql = $this->db;
 
-    $data = $sql->findAll('select * from m_akun where is_deleted = 0 order by kode');
+    $data = $sql->findAll('select * from acc_m_akun where is_deleted = 0 order by kode');
     foreach ($data as $key => $val) {
         $data[$key] = (array) $val;
         $spasi = ($val->level == 1) ? '' : str_repeat("···", $val->level - 1);
@@ -57,7 +57,7 @@ $app->post('/acc/l_buku_besar/laporan', function ($request, $response) {
 
         if ($params['m_akun_id']['is_tipe'] == 1) {
             $getchild = $sql->select("*")
-                    ->from("m_akun")
+                    ->from("acc_m_akun")
                     ->where("parent_id", "=", $params['m_akun_id']['id'])
                     ->where("is_deleted", "=", 0)
                     ->findAll();
@@ -197,7 +197,7 @@ $app->get('/acc/l_buku_besar/exportExcel', function ($request, $response) {
 
     if ($params['m_akun_id']['is_tipe'] == 1) {
         $getchild = $sql->select("*")
-                ->from("m_akun")
+                ->from("acc_m_akun")
                 ->where("parent_id", "=", $params['m_akun_id']['id'])
                 ->where("is_deleted", "=", 0)
                 ->findAll();

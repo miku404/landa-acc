@@ -42,7 +42,7 @@ $app->post('/acc/l_neraca_saldo/laporan', function ($request, $response) {
         $data['total_kredit'] = 0;
 
         $getakun = $sql->select("*")
-                ->from("m_akun")
+                ->from("acc_m_akun")
                 ->where("is_deleted", "=", 0)
                 ->findAll();
 
@@ -117,7 +117,7 @@ $app->get('/acc/l_neraca_saldo/exportExcel', function ($request, $response) {
     $arr = [];
 
     $getakun = $sql->select("*")
-            ->from("m_akun")
+            ->from("acc_m_akun")
             ->where("is_deleted", "=", 0)
             ->findAll();
 

@@ -25,6 +25,7 @@
                                         <label class="col-sm-1 col-form-label-sm mb-0px">Lokasi</label>
                                         <div class="col-sm-2">
                                             <select class="form-control form-control-sm" st-search="m_lokasi_id">
+                                                <option value="">- Semua Lokasi -</option>
                                                 <option ng-repeat="val in listLokasi" ng-value="val.id">{{val.nama}}</option>
 
                                             </select>
@@ -86,8 +87,8 @@
                                 <td style="text-align: left;">
                                     {{row.tanggal}}
                                 </td>
-                                <td style="text-align: left;">
-                                    {{row.total}}
+                                <td style="text-align: right;">
+                                    {{(row.total_debit - row.total_kredit) | number}}
                                 </td>
                                 <td style="text-align: left;">
                                     {{row.created_at}}
@@ -134,7 +135,7 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label-sm">No Transaksi</label>
+                                            <label class="col-sm-3 col-form-label-sm required">No Transaksi</label>
                                             <div class="col-sm-9">
                                                 <input ng-disabled="true" type="text" class="form-control form-control-sm" ng-model="form.no_transaksi" ng-disabled="is_view" required/>
                                             </div>
@@ -146,7 +147,7 @@
                                 <div class="col-md-6">
                                     <div class="col-md-12">
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label-sm">Tanggal</label>
+                                            <label class="col-sm-3 col-form-label-sm required">Tanggal</label>
                                             <div class="col-sm-9">
                                                 <div class="input-group">
                                                     <input type="text" class="form-control form-control-sm" ng-click="toggle($event, 'tanggal')"  is-open="opened.tanggal" uib-datepicker-popup="dd-MM-yyyy" ng-model="form.tanggal" ng-disabled="is_view"/>
@@ -201,7 +202,7 @@
                                                                 <ui-select-match placeholder="Pilih Akun">
                                                                     {{ $select.selected.kode + " - " + $select.selected.nama}}
                                                                 </ui-select-match>
-                                                                <ui-select-choices position="down" repeat="val in akunAll | filter : $select.search">{{val.kode + " - " + val.nama}}</ui-select-choices>
+                                                                <ui-select-choices position="down" repeat="val in akunKas | filter : $select.search">{{val.kode + " - " + val.nama}}</ui-select-choices>
                                                             </ui-select>
                                                         </div>
                                                     </td>
@@ -214,7 +215,7 @@
                                                                 <span class="input-group-text">Rp</span>
                                                             </div>
 
-                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka" maxlength="12" ng-disabled="is_view" ng-model="val.debit" ng-change="sumTotal()"/>
+                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka rp" maxlength="12" ng-disabled="is_view" ng-model="val.debit" ng-change="sumTotal()"/>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -223,7 +224,7 @@
                                                                 <span class="input-group-text">Rp</span>
                                                             </div>
 
-                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka" maxlength="12" ng-disabled="is_view" ng-model="val.kredit" ng-change="sumTotal()"/>
+                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka rp" maxlength="12" ng-disabled="is_view" ng-model="val.kredit" ng-change="sumTotal()"/>
                                                         </div>
                                                     </td>
                                                 </tr>

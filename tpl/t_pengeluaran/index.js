@@ -8,13 +8,21 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
     $scope.is_edit = false;
     $scope.is_view = false;
 
-    Data.get('acc/m_akun/akunKas').then(function(data) {
+    Data.get('acc/m_akun/akunKas').then(function (data) {
         $scope.akun = data.data.list;
     });
-    Data.get('acc/m_akun/akunDetail').then(function(data) {
+    Data.get('acc/m_akun/akunDetail').then(function (data) {
         $scope.akunDetail = data.data.list;
     });
-    
+
+    Data.get('acc/m_lokasi/getLokasi').then(function (response) {
+        $scope.listLokasi = response.data.list;
+    });
+
+    Data.get('acc/m_supplier/getSupplier').then(function (response) {
+        $scope.listSupplier = response.data.list;
+    });
+
     //============================GAMBAR===========================//
     var uploader = $scope.uploader = new FileUploader({
         url: Data.base + 'acc/t_pengeluaran/upload/bukti',
@@ -32,7 +40,7 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
             var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
             var x = '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
             if (!x) {
-                toaster.pop('error', "Jenis gambar tidak sesuai");
+                $rootScope.alert("Terjadi Kesalahan", "Jenis gambar tidak sesuai", "error");
             }
             return x;
         }
@@ -43,7 +51,7 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
         fn: function (item) {
             var xz = item.size < 2097152;
             if (!xz) {
-                toaster.pop('error', "Ukuran gambar tidak boleh lebih dari 2 MB");
+                $rootScope.alert("Terjadi Kesalahan", "Ukuran gambar tidak boleh lebih dari 2MB", "error");
             }
             return xz;
         }
@@ -82,24 +90,24 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
         });
     };
     /* sampe di sini*/
-    
-    $scope.getDetail = function (id){
+
+    $scope.getDetail = function (id) {
         console.log(id)
         var data = {
-            id : id
+            id: id
         }
-        Data.get(control_link + '/getDetail', data).then(function(data) {
+        Data.get(control_link + '/getDetail', data).then(function (data) {
             $scope.listDetail = data.data.list;
         });
     }
-    
-    
+
+
     $scope.addDetail = function (val) {
         var comArr = $(".tabletr").last().index() + 1
         var newDet = {
             m_akun_id: '',
-            keterangan : '',
-            kredit : 0,
+            keterangan: '',
+            kredit: 0,
             is_label: false,
         };
         val.splice(comArr, 0, newDet);
@@ -113,7 +121,7 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
             alert("Something gone wrong");
         }
     };
-    
+
     $scope.sumTotal = function () {
         console.log("ya")
         var totaldebit = 0;
@@ -123,7 +131,7 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
         console.log(totaldebit)
         $scope.form.total = totaldebit;
     };
-    
+
     $scope.kode = function (lokasi) {
         Data.get(control_link + '/kode/' + lokasi.kode).then(function (response) {
             $scope.form.no_transaksi = response.data.kode;
@@ -148,10 +156,8 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
         if (tableState.search.predicateObject) {
             param['filter'] = tableState.search.predicateObject;
         }
-        Data.get('acc/m_lokasi/getLokasi', param).then(function (response) {
-            $scope.listLokasi = response.data.list;
-        });
-        
+
+
         Data.get(control_link + '/index', param).then(function (response) {
             $scope.displayed = response.data.list;
             $scope.base_url = response.data.base_url;
@@ -167,6 +173,7 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
         $scope.is_disable = false;
         $scope.formtitle = master + " | Form Tambah Data";
         $scope.form = {};
+        $scope.form.tanggal = new Date();
         $scope.listDetail = [{}];
     };
     /** update */
@@ -179,40 +186,36 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
         $scope.form = form;
         $scope.form.tanggal = new Date(form.tanggal);
         $scope.getDetail(form.id);
+        $scope.listgambar(form.id);
         console.log($scope.form);
-        
+
     };
     /** view */
     $scope.view = function (form) {
         $scope.is_edit = true;
         $scope.is_view = true;
         $scope.is_disable = true;
-        $scope.formtitle = master + " | Lihat Data : " + form.nama;
+        $scope.formtitle = master + " | Lihat Data : " + form.no_transaksi;
         $scope.form = form;
+        $scope.form.tanggal = new Date(form.tanggal);
+        $scope.getDetail(form.id);
+        $scope.listgambar(form.id);
     };
     /** save action */
     $scope.save = function (form) {
         var data = {
-            form : form,
-            detail : $scope.listDetail
+            form: form,
+            detail: $scope.listDetail
         }
-        
+
         console.log(data)
         var url = (form.id > 0) ? '/update' : '/create';
         Data.post(control_link + url, data).then(function (result) {
             if (result.status_code == 200) {
-
-
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.cancel();
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
             }
         });
     };
@@ -238,13 +241,8 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -264,13 +262,8 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
             if (result.value) {
                 row.is_deleted = 0;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Restore",
-                        text: "Data Berhasil Di Restore.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil direstore", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -290,13 +283,8 @@ app.controller('pengeluaranCtrl', function ($scope, Data, $rootScope, $uibModal,
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/delete', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus Permanen.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus permanen", "success");
+                    $scope.cancel();
 
                 });
             }

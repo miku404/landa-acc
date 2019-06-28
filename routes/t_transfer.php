@@ -3,15 +3,31 @@
 function validasi($data, $custom = array())
 {
     $validasi = array(
-//        'parent_id' => 'required',
-//        'kode'      => 'required',
-//        'nama'      => 'required',
-        // 'tipe' => 'required',
+        'm_lokasi_id' => 'required',
+        'no_transaksi'      => 'required',
+        'total'      => 'required',
+        'tanggal' => 'required',
+        'm_akun_asal_id' => 'required',
+        'm_akun_tujuan_id' => 'required',
     );
-//    GUMP::set_field_name("parent_id", "Akun");
+    GUMP::set_field_name("m_lokasi_id", "Lokasi");
+    GUMP::set_field_name("m_akun_asal_id", "Akun Asal");
+    GUMP::set_field_name("m_akun_tujuan_id", "Akun Tujuan");
+    GUMP::set_field_name("total", "Nominal");
     $cek = validate($data, $validasi, $custom);
     return $cek;
 }
+
+$app->get('/acc/t_transfer/kode/{kode}', function ($request, $response) {
+
+    $kode_unit_1 = $request->getAttribute('kode');
+    $db = $this->db;
+
+    $model = $db->find("select * from acc_transfer order by id desc");
+    $urut = (empty($model)) ? 1 : ((int) substr($model->no_urut, -3)) + 1;
+    $no_urut = substr('0000' . $urut, -3);
+    return successResponse($response, [ "kode" => $kode_unit_1 .  "TRN" . date("y"). $no_urut, "urutan" => $no_urut]);
+});
 
 $app->get('/acc/t_transfer/akunKas', function ($request, $response){
     $db = $this->db;
@@ -70,7 +86,8 @@ $app->get('/acc/t_transfer/index', function ($request, $response) {
     
     foreach($models as $key => $val){
         $models[$key] = (array) $val;
-        $models[$key]['created_at'] = date("Y-m-d h:i:s",$val->created_at);
+        $models[$key]['tanggal'] = date("d-m-Y h:i:s", strtotime($val->tanggal));
+        $models[$key]['created_at'] = date("d-m-Y h:i:s",$val->created_at);
         $models[$key]['m_akun_asal_id'] = ["id" => $val->idAsal, "nama" => $val->namaAsal, "kode" => $val->kodeAsal];
         $models[$key]['m_akun_tujuan_id'] = ["id" => $val->idTujuan, "nama" => $val->namaTujuan, "kode" => $val->kodeTujuan];
         $models[$key]['m_lokasi_id'] = ["id" => $val->m_lokasi_id, "nama" => $val->namaLokasi, "kode" => $val->kodeLokasi];
@@ -94,7 +111,7 @@ $app->post('/acc/t_transfer/create', function ($request, $response) {
     $data   = $params;
 //    print_r($data);die();
     $sql = $this->db;
-    $validasi = validasi($data);
+    $validasi = validasi($data['form']);
     if ($validasi === true) {
         $getNoUrut = $sql->select("*")->from("acc_transfer")->orderBy("no_urut DESC")->find();
         $insert['no_urut'] = 1;

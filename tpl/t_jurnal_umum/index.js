@@ -9,7 +9,7 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
     $scope.is_view = false;
 
     Data.get('acc/m_akun/akunKas').then(function(data) {
-        $scope.akun = data.data.list;
+        $scope.akunKas = data.data.list;
     });
     Data.get('acc/m_akun/akunAll').then(function(data) {
         $scope.akunAll = data.data.list;
@@ -32,7 +32,7 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
             var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
             var x = '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
             if (!x) {
-                toaster.pop('error', "Jenis gambar tidak sesuai");
+                $rootScope.alert("Terjadi Kesalahan", "Jenis gambar tidak sesuai", "error");
             }
             return x;
         }
@@ -43,7 +43,7 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
         fn: function (item) {
             var xz = item.size < 2097152;
             if (!xz) {
-                toaster.pop('error', "Ukuran gambar tidak boleh lebih dari 2 MB");
+                $rootScope.alert("Terjadi Kesalahan", "Ukuran gambar tidak boleh lebih dari 2MB", "error");
             }
             return xz;
         }
@@ -174,6 +174,7 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
         $scope.is_disable = false;
         $scope.formtitle = master + " | Form Tambah Data";
         $scope.form = {};
+        $scope.form.tanggal = new Date();
         $scope.listDetail = [{}];
     };
     /** update */
@@ -211,16 +212,10 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
             if (result.status_code == 200) {
 
 
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.cancel();
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors) ,"error");
             }
         });
     };
@@ -246,13 +241,8 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus", "success");
+                $scope.cancel();
 
                 });
             }
@@ -272,13 +262,8 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
             if (result.value) {
                 row.is_deleted = 0;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Restore",
-                        text: "Data Berhasil Di Restore.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil direstore", "success");
+                $scope.cancel();
 
                 });
             }
@@ -298,13 +283,8 @@ app.controller('jurnalCtrl', function ($scope, Data, $rootScope, $uibModal, Uplo
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/delete', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus Permanen.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus permanen", "success");
+                $scope.cancel();
 
                 });
             }

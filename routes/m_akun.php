@@ -62,20 +62,20 @@ $app->get('/acc/m_akun/getSaldoAwal', function ($request, $response) {
     $tanggal = date("Y-m-d");
     $db = $this->db;
     $db->select("
-        m_akun.*,
+        acc_m_akun.*,
         acc_trans_detail.debit,
         acc_trans_detail.kredit,
         acc_trans_detail.tanggal
     ")
-        ->from('m_akun')
+        ->from('acc_m_akun')
         ->leftJoin('acc_trans_detail', 
             'acc_trans_detail.m_lokasi_id = ' . $params['m_lokasi_id'] . ' and 
             acc_trans_detail.m_akun_id = m_akun.id and
             acc_trans_detail.reff_type = "Saldo Awal" and
             acc_trans_detail.keterangan = "Saldo Awal"')
-        ->where("m_akun.is_deleted", "=", 0)
+        ->where("acc_m_akun.is_deleted", "=", 0)
 //            ->where("acc_trans_detail.m_lokasi_id", "=", $params['m_lokasi_id'])
-            ->orderBy('m_akun.kode');
+            ->orderBy('acc_m_akun.kode');
 
     $models = $db->findAll();
     
@@ -99,21 +99,21 @@ $app->get('/acc/m_akun/index', function ($request, $response) {
     $idcabang = isset($params['params_cabang']) ? $params['params_cabang'] : '';
 
     $db = $this->db;
-    $db->select("m_akun.*, induk.nama as nama_induk, induk.kode as kode_induk")
-        ->from("m_akun")
-        ->leftJoin("m_akun as induk", "induk.id = m_akun.parent_id")
-        ->orderBy('m_akun.kode');
+    $db->select("acc_m_akun.*, induk.nama as nama_induk, induk.kode as kode_induk")
+        ->from("acc_m_akun")
+        ->leftJoin("acc_m_akun as induk", "induk.id = acc_m_akun.parent_id")
+        ->orderBy('acc_m_akun.kode');
 
     if (isset($params['filter'])) {
         $filter = (array) json_decode($params['filter']);
 
         foreach ($filter as $key => $val) {
             if ($key == 'is_deleted') {
-                $db->where("m_akun.is_deleted", '=', $val);
+                $db->where("acc_m_akun.is_deleted", '=', $val);
             }else if ($key == 'kode') {
-                $db->where("m_akun.kode", 'LIKE', $val);
+                $db->where("acc_m_akun.kode", 'LIKE', $val);
             }else if ($key == 'nama') {
-                $db->where("m_akun.nama", 'LIKE', $val);
+                $db->where("acc_m_akun.nama", 'LIKE', $val);
             }else{
                 $db->where($key, 'LIKE', $val);
             }
@@ -179,7 +179,7 @@ $app->get('/acc/m_akun/cabang', function ($request, $response) {
 function setLevelTipeAkun($parent_id)
 {
     $db = new Cahkampung\Landadb(config('DB')['db']);
-    $parent = $db->find("select * from m_akun where id = '" . $parent_id . "'");
+    $parent = $db->find("select * from acc_m_akun where id = '" . $parent_id . "'");
     return $parent->level + 1;
 }
 
@@ -203,7 +203,7 @@ $app->post('/acc/m_akun/create', function ($request, $response) {
         } else {
             $data['level'] = setLevelTipeAkun($data['parent_id']);
 
-            $akun         = $sql->find("select * from m_akun where id = '" . $data['parent_id'] . "'");
+            $akun         = $sql->find("select * from acc_m_akun where id = '" . $data['parent_id'] . "'");
             $data['tipe'] = isset($akun->tipe) ? $akun->tipe : '';
         }
 
@@ -222,7 +222,7 @@ $app->post('/acc/m_akun/cariunker', function ($request, $response) {
     $params = $request->getParams();
     $sql    = $this->db;
     $id     = $request->getAttribute('id');
-    $data   = $sql->findAll("select * from m_akun where (is_tipe=0 and is_deleted = 0 and nama like '%{$params['nama']}%') order by kode");
+    $data   = $sql->findAll("select * from acc_m_akun where (is_tipe=0 and is_deleted = 0 and nama like '%{$params['nama']}%') order by kode");
     foreach ($data as $key => $val) {
         $data[$key]                 = (array) $val;
         $spasi                      = ($val->level == 1) ? '' : str_repeat("···", $val->level - 1);
@@ -244,15 +244,15 @@ $app->get('/acc/m_akun/selecttype/{type}/{m_unker_id}', function ($request, $res
 
     if ($type == 6) {
       // $stype = "Receivable";
-      $models = $sql->findAll("SELECT * FROM m_akun WHERE is_tipe = 0 AND is_deleted = '0' AND tipe = 'Piutang Usaha' OR tipe = 'Piutang Lain'");
+      $models = $sql->findAll("SELECT * FROM acc_m_akun WHERE is_tipe = 0 AND is_deleted = '0' AND tipe = 'Piutang Usaha' OR tipe = 'Piutang Lain'");
 
     } else if ($type == 9) {
       // $stype = "Payable";
-      $models = $sql->findAll("SELECT * FROM m_akun WHERE is_tipe = 0 AND is_deleted = '0' AND tipe = 'Hutang Lancar' OR tipe = 'Hutang Tidak Lancar'");
+      $models = $sql->findAll("SELECT * FROM acc_m_akun WHERE is_tipe = 0 AND is_deleted = '0' AND tipe = 'Hutang Lancar' OR tipe = 'Hutang Tidak Lancar'");
 
     } else {
       $stype = "Cash & Bank";
-      $models = $sql->findAll("SELECT * FROM m_akun WHERE is_tipe = 0 AND is_deleted = '0' AND tipe = '$stype'");
+      $models = $sql->findAll("SELECT * FROM acc_m_akun WHERE is_tipe = 0 AND is_deleted = '0' AND tipe = '$stype'");
     }
 
     $details = [];
@@ -269,7 +269,7 @@ $app->get('/acc/m_akun/selecttypes/{type}/{unker_id}/{mdl}', function ($request,
     $unker_id = $request->getAttribute('unker_id');
     $mdl      = $request->getAttribute('mdl');
 
-    $sql->select("*")->from("m_akun")
+    $sql->select("*")->from("acc_m_akun")
         ->where("is_deleted", "=", 0)
         ->andWhere("is_tipe", "=", 0);
 
@@ -324,7 +324,7 @@ $app->get('/acc/m_akun/getAll', function ($request, $response) {
     $params = $request->getParams();
     $sql    = $this->db;
 
-    $models = $sql->findAll('select * from m_akun where is_deleted = 0  and is_tipe = 0');
+    $models = $sql->findAll('select * from acc_m_akun where is_deleted = 0  and is_tipe = 0');
 
     return successResponse($response, ['data' => $models]);
 });
@@ -349,7 +349,7 @@ $app->post('/acc/m_akun/caritype/{type}/cari', function ($request, $response) {
     }
 
     $sql->select("*")
-    ->from("m_akun")
+    ->from("acc_m_akun")
     ->customWhere("(is_deleted = 0 and tipe in ({$stype})) and (nama like '%{$params['nama']}%') and level >= 2 and is_tipe = 0");
 //    $sql->log();
     $models = $sql->findAll();
@@ -374,13 +374,13 @@ $app->get('/acc/m_akun/istype/{type}', function ($request, $response) {
     } else{
         $tipe = 'and tipe LIKE "%'.str_replace('-', ' ', str_replace('_', ' ', $type)).'%"';
     }
-    $data = $sql->findAll('select * from m_akun where is_deleted = 0 and is_tipe = 0 ' . $tipe . ' order by kode');
+    $data = $sql->findAll('select * from acc_m_akun where is_deleted = 0 and is_tipe = 0 ' . $tipe . ' order by kode');
     return successResponse($response, $data);
 });
 
 $app->get('/acc/m_akun/listakun', function ($request, $response) {
     $sql  = $this->db;
-    $data = $sql->findAll('select * from m_akun where is_deleted = 0 order by kode');
+    $data = $sql->findAll('select * from acc_m_akun where is_deleted = 0 order by kode');
 
     foreach ($data as $key => $val) {
         $data[$key]                 = (array) $val;
@@ -393,7 +393,7 @@ $app->get('/acc/m_akun/listakun', function ($request, $response) {
 $app->get('/acc/m_akun/akununker/{id}', function ($request, $response) {
     $sql  = $this->db;
     $id   = $request->getAttribute('id');
-    $data = $sql->findAll('select * from m_akun where is_deleted = 0 and (m_unker_id = "' . $id . '" OR is_tipe=1) order by kode');
+    $data = $sql->findAll('select * from acc_m_akun where is_deleted = 0 and (m_unker_id = "' . $id . '" OR is_tipe=1) order by kode');
 
     foreach ($data as $key => $val) {
         $data[$key]                 = (array) $val;
@@ -407,7 +407,7 @@ $app->get('/acc/m_akun/getakun/{id}', function ($request, $response) {
     $db   = $this->db;
     $id   = $request->getAttribute('id');
     $data = $db->select("kode")
-        ->from("m_akun")
+        ->from("acc_m_akun")
         ->where('id', '=', $id)
         ->find();
     return successResponse($response, ['data' => $data]);
@@ -416,7 +416,7 @@ $app->get('/acc/m_akun/getakun/{id}', function ($request, $response) {
 $app->get('/acc/m_akun/getakunkas', function ($request, $response) {
     $db   = $this->db;
     $data = $db->select('*')
-        ->from('m_akun')
+        ->from('acc_m_akun')
         ->where('tipe', '=', 'Cash & Bank')
         ->andWhere('is_deleted', '=', 0)
         ->andWhere('level', '=', 2)
@@ -429,7 +429,7 @@ $app->get('/acc/m_akun/getakunbytipe', function ($request, $response) {
 
     $db   = $this->db;
     $data = $db->select('*')
-        ->from('m_akun')
+        ->from('acc_m_akun')
         // ->where('tipe', '=', $params['tipe'])
         ->customWhere("tipe LIKE '%{$params['tipe']}%'")
         ->andWhere('is_deleted', '=', 0)
@@ -456,13 +456,13 @@ $app->get('/acc/m_akun/list/{type}/{m_unker_id}', function ($request, $response)
 
     }
 
-    $data = $sql->findAll('SELECT * from m_akun where is_deleted = 0 and is_tipe = 0 ' . $tipe . ' and m_unker_id =' . $m_unker_id . ' order by kode');
+    $data = $sql->findAll('SELECT * from acc_m_akun where is_deleted = 0 and is_tipe = 0 ' . $tipe . ' and m_unker_id =' . $m_unker_id . ' order by kode');
     return successResponse($response, $data);
 });
 $app->get('/acc/m_akun/saldoakunkas/{m_unker_id}', function ($request, $response) {
     $m_unker_id = $request->getAttribute('m_unker_id');
     $sql       = $this->db;
-    $data      = $sql->findAll("select * from m_akun where is_deleted = 0 and is_tipe = 0 and tipe = 'Cash & Bank' order by kode");
+    $data      = $sql->findAll("select * from acc_m_akun where is_deleted = 0 and is_tipe = 0 and tipe = 'Cash & Bank' order by kode");
     $cabang    = $sql->find("select * from m_unker where is_deleted = 0 order by id asc");
     $cbg_id    = ($m_unker_id != 0) ? $m_unker_id : $cabang->id;
     $starttime = new DateTime("NOW");
@@ -496,11 +496,11 @@ $app->post('/acc/m_akun/update', function ($request, $response) {
         //     $data['level'] = setLevelTipeAkun($data['parent_id']);
         // }
 
-        $akun         = $db->find("select * from m_akun where id = '" . $data['parent_id'] . "'");
+        $akun         = $db->find("select * from acc_m_akun where id = '" . $data['parent_id'] . "'");
         $data['tipe'] = isset($akun->tipe) ? $akun->tipe : '';
         $data['kode']    = $data['kode_induk'] . '.' . $data['kode'];
 
-        $model = $db->update("m_akun", $data, array('id' => $data['id']));
+        $model = $db->update("acc_m_akun", $data, array('id' => $data['id']));
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -534,7 +534,7 @@ $app->post('/acc/m_akun/trash', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $model = $db->update("m_akun", $data, array('id' => $data['id']));
+    $model = $db->update("acc_m_akun", $data, array('id' => $data['id']));
     if ($model) {
         return successResponse($response, $model);
     } else {
@@ -573,7 +573,7 @@ $app->post('/acc/m_akun/delete', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $delete = $db->delete('m_akun', array('id' => $data['id']));
+    $delete = $db->delete('acc_m_akun', array('id' => $data['id']));
        if ($delete) {
            return successResponse($response, ['data berhasil dihapus']);
        } else {
@@ -609,7 +609,7 @@ $app->post('/acc/m_akun/import', function ($request, $response) {
                 $kode = $objPHPExcel->getSheet(0)->getCell('A' . $row)->getValue();
 
                 if (isset($kode)) {
-                    $cek_tipe_akun = $db->find("select * from m_akun where is_tipe=1 and kode='{$kode}'");
+                    $cek_tipe_akun = $db->find("select * from acc_m_akun where is_tipe=1 and kode='{$kode}'");
 
                     if (isset($cek_tipe_akun->id)) {
                         $id_parent = $cek_tipe_akun->id;
@@ -624,7 +624,7 @@ $app->post('/acc/m_akun/import', function ($request, $response) {
                         $data['parent_id']  = $id_parent;
                         $data['is_deleted'] = 0;
 
-                        $insert = $db->insert("m_akun", $data);
+                        $insert = $db->insert("acc_m_akun", $data);
                     }
                 }
             }
@@ -642,7 +642,7 @@ $app->post('/acc/m_akun/import', function ($request, $response) {
 $app->get('/acc/m_akun/export', function ($request, $response) {
     $db = $this->db;
 
-    $model = $db->findAll("select * from m_akun where is_deleted = 0 and is_tipe=1 order by kode asc");
+    $model = $db->findAll("select * from acc_m_akun where is_deleted = 0 and is_tipe=1 order by kode asc");
 
     $data_model = [];
     $data_kode  = [];
@@ -781,7 +781,7 @@ $app->post('/acc/m_akun/save_akun_kasir', function ($request, $response) {
     $datas['is_kasir'] = isset($data['is_kasir']) && $data['is_kasir'] == true ? 1 : 0;
     try {
         // print_r($datas);exit();
-        $model = $db->update("m_akun", $datas, array('id' => $data['id']));
+        $model = $db->update("acc_m_akun", $datas, array('id' => $data['id']));
         return successResponse($response, $model);
     } catch (Exception $e) {
         return unprocessResponse($response, ['Data Gagal Di Simpan']);
@@ -790,7 +790,7 @@ $app->post('/acc/m_akun/save_akun_kasir', function ($request, $response) {
 
 $app->get('/acc/m_akun/akunAll', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("m_akun")
+    $models = $db->select("*")->from("acc_m_akun")
             ->where("is_deleted", "=", 0)
             ->findAll();
     return successResponse($response, [
@@ -800,7 +800,7 @@ $app->get('/acc/m_akun/akunAll', function ($request, $response){
 
 $app->get('/acc/m_akun/akunKas', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("m_akun")
+    $models = $db->select("*")->from("acc_m_akun")
             ->where("tipe", "=", "Cash & Bank")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
@@ -814,7 +814,7 @@ $app->get('/acc/m_akun/akunKas', function ($request, $response){
 
 $app->get('/acc/m_akun/akunDetail', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("m_akun")
+    $models = $db->select("*")->from("acc_m_akun")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
             ->findAll();

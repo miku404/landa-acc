@@ -8,10 +8,10 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
     $scope.is_edit = false;
     $scope.is_view = false;
 
-    Data.get(control_link + '/akunKas').then(function(data) {
+    Data.get(control_link + '/akunKas').then(function (data) {
         $scope.akun = data.data.list;
     });
-    
+
     $scope.master = master;
     $scope.callServer = function callServer(tableState) {
         tableStateRef = tableState;
@@ -29,16 +29,23 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         if (tableState.search.predicateObject) {
             param['filter'] = tableState.search.predicateObject;
         }
-        
+
         Data.get('acc/m_lokasi/getLokasi', param).then(function (response) {
             $scope.listLokasi = response.data.list;
         });
-        
+
         Data.get(control_link + '/index', param).then(function (response) {
             $scope.displayed = response.data.list;
             $scope.base_url = response.data.base_url;
         });
         $scope.isLoading = false;
+    };
+
+    $scope.kode = function (lokasi) {
+        Data.get(control_link + '/kode/' + lokasi.kode).then(function (response) {
+            $scope.form.no_transaksi = response.data.kode;
+            $scope.form.no_urut = response.data.urutan;
+        });
     };
 
     /** create */
@@ -49,6 +56,7 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         $scope.is_disable = false;
         $scope.formtitle = master + " | Form Tambah Data";
         $scope.form = {};
+        $scope.form.tanggal = new Date();
         $scope.listDetail = [{}];
     };
     /** update */
@@ -61,39 +69,33 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         $scope.form = form;
         $scope.form.tanggal = new Date(form.tanggal);
         console.log($scope.form);
-        
+
     };
     /** view */
     $scope.view = function (form) {
         $scope.is_edit = true;
         $scope.is_view = true;
         $scope.is_disable = true;
-        $scope.formtitle = master + " | Lihat Data : " + form.nama;
+        $scope.formtitle = master + " | Lihat Data : " + form.no_transaksi;
         $scope.form = form;
     };
     /** save action */
     $scope.save = function (form) {
         var data = {
-            form : form,
+            form: form,
         }
-        
-        
+
+
         console.log(data)
         var url = (form.id > 0) ? '/update' : '/create';
         Data.post(control_link + url, data).then(function (result) {
             if (result.status_code == 200) {
 
 
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.cancel();
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
             }
         });
     };
@@ -119,13 +121,8 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -145,13 +142,8 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 0;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Restore",
-                        text: "Data Berhasil Di Restore.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil direstore", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -171,13 +163,8 @@ app.controller('transferCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/delete', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus Permanen.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus permanen", "success");
+                    $scope.cancel();
 
                 });
             }

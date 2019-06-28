@@ -11,6 +11,7 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
     Data.get('acc/m_akun/akunKas').then(function(data) {
         $scope.akun = data.data.list;
     });
+    
     Data.get('acc/m_akun/akunDetail').then(function(data) {
         $scope.akunDetail = data.data.list;
     });
@@ -18,7 +19,7 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
     
     //============================GAMBAR===========================//
     var uploader = $scope.uploader = new FileUploader({
-        url: Data.base + 'acc/t_jurnal_umum/upload/bukti',
+        url: Data.base + 'acc/t_penerimaan/upload/bukti',
         formData: [],
         removeAfterUpload: true,
     });
@@ -33,7 +34,7 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
             var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
             var x = '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
             if (!x) {
-                toaster.pop('error', "Jenis gambar tidak sesuai");
+                $rootScope.alert("Terjadi Kesalahan", "Jenis gambar tidak sesuai", "error");
             }
             return x;
         }
@@ -44,7 +45,7 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         fn: function (item) {
             var xz = item.size < 2097152;
             if (!xz) {
-                toaster.pop('error', "Ukuran gambar tidak boleh lebih dari 2 MB");
+                $rootScope.alert("Terjadi Kesalahan", "Ukuran gambar tidak boleh lebih dari 2MB", "error");
             }
             return xz;
         }
@@ -78,6 +79,7 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
     };
 
     $scope.listgambar = function (id) {
+        console.log(id)
         Data.get('acc/t_penerimaan/listgambar/' + id).then(function (data) {
             $scope.gambar = data.data;
         });
@@ -167,6 +169,7 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         $scope.is_disable = false;
         $scope.formtitle = master + " | Form Tambah Data";
         $scope.form = {};
+        $scope.form.tanggal = new Date();
         $scope.listDetail = [{}];
     };
     /** update */
@@ -177,8 +180,9 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         $scope.is_disable = true;
         $scope.formtitle = master + " | Edit Data : " + form.no_transaksi;
         $scope.form = form;
-        $scope.form.tanggal = new Date(form.tanggal);
+//        $scope.form.tanggal = new Date(form.tanggal);
         $scope.getDetail(form.id);
+        $scope.listgambar(form.id);
         console.log($scope.form);
         
     };
@@ -187,8 +191,11 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         $scope.is_edit = true;
         $scope.is_view = true;
         $scope.is_disable = true;
-        $scope.formtitle = master + " | Lihat Data : " + form.nama;
+        $scope.formtitle = master + " | Lihat Data : " + form.no_transaksi;
         $scope.form = form;
+//        $scope.form.tanggal = new Date(form.tanggal);
+        $scope.getDetail(form.id);
+        $scope.listgambar(form.id);
     };
     /** save action */
     $scope.save = function (form) {
@@ -201,18 +208,10 @@ app.controller('penerimaanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         var url = (form.id > 0) ? '/update' : '/create';
         Data.post(control_link + url, data).then(function (result) {
             if (result.status_code == 200) {
-
-
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.cancel();
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
             }
         });
     };

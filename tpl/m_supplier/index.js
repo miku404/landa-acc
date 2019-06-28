@@ -68,18 +68,10 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         var url = (form.id > 0) ? '/update' : '/create';
         Data.post(control_link + url, form).then(function (result) {
             if (result.status_code == 200) {
-
-
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.cancel();
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
             }
         });
     };
@@ -105,13 +97,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -130,16 +117,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         }).then((result) => {
             if (result.value) {
                 row.is_deleted = 0;
-                Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Restore",
-                        text: "Data Berhasil Di Restore.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
-
-                });
+                $rootScope.alert("Berhasil", "Data berhasil direstore", "success");
+                    $scope.cancel();
             }
         });
     };
@@ -157,13 +136,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/delete', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus Permanen.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus permanen", "success");
+                    $scope.cancel();
 
                 });
             }

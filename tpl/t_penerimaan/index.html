@@ -26,6 +26,7 @@
                                         <label class="col-sm-1 col-form-label-sm mb-0px">Lokasi</label>
                                         <div class="col-sm-2">
                                             <select class="form-control form-control-sm" st-search="m_lokasi_id">
+                                                <option value="">- Semua Lokasi -</option>
                                                 <option ng-repeat="val in listLokasi" ng-value="val.id">{{val.nama}}</option>
 
                                             </select>
@@ -94,7 +95,7 @@
                                     {{row.kodeAkun + " - " + row.namaAkun}}
                                 </td>
                                 <td style="text-align: left;">
-                                    {{row.total}}
+                                    {{row.total| number}}
                                 </td>
                                 <td style="text-align: left;">
                                     {{row.created_at}}
@@ -141,7 +142,7 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label-sm">No Transaksi</label>
+                                            <label class="col-sm-3 col-form-label-sm required">No Transaksi</label>
                                             <div class="col-sm-9">
                                                 <input type="text" ng-disabled="true" class="form-control form-control-sm" ng-model="form.no_transaksi" ng-disabled="is_view" required/>
                                             </div>
@@ -149,7 +150,7 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label-sm">Masuk Ke</label>
+                                            <label class="col-sm-3 col-form-label-sm required">Masuk Ke</label>
                                             <div class="col-sm-9">
                                                 <ui-select class="ui-select-sm" ng-model="form.m_akun_id" theme="bootstrap" ng-disabled="is_view">
                                                     <ui-select-match placeholder="Pilih Akun">
@@ -165,7 +166,7 @@
                                 <div class="col-md-6">
                                     <div class="col-md-12">
                                         <div class="form-group row">
-                                            <label class="col-sm-3 col-form-label-sm">Tanggal</label>
+                                            <label class="col-sm-3 col-form-label-sm required">Tanggal</label>
                                             <div class="col-sm-9">
                                                 <div class="input-group">
                                                     <input type="text" class="form-control form-control-sm" ng-click="toggle($event, 'tanggal')"  is-open="opened.tanggal" uib-datepicker-popup="dd-MM-yyyy" ng-model="form.tanggal" ng-disabled="is_view"/>
@@ -232,7 +233,7 @@
                                                                 <span class="input-group-text">Rp</span>
                                                             </div>
 
-                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka" maxlength="12" ng-disabled="is_view" ng-model="val.kredit" ng-change="sumTotal()"/>
+                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka rp" maxlength="12" ng-disabled="is_view" ng-model="val.kredit" ng-change="sumTotal()"/>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -245,7 +246,7 @@
                                                             <div class="input-group-prepend">
                                                                 <span class="input-group-text">Rp</span>
                                                             </div>
-                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka" maxlength="12" ng-disabled="true" ng-model="form.total"/>
+                                                            <input type="text" ui-number-mask="0" class="form-control form-control-sm angka rp" maxlength="12" ng-disabled="true" ng-model="form.total"/>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -425,18 +426,18 @@
 
                 </form>
             </div>
-<!--            <div class="card-footer">
-                <div class="pull-right">
-                    <button type="submit" class="btn btn-secondary btn-sm" ng-click="cancel()">
-                        <i class="fa fa-arrow-left"></i>
-                        &nbsp;Kembali
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-sm" ng-hide="is_view" button-spinner="loading" ng-disabled="cek <= 3 || loading" ng-click="save(form)">
-                        <i class="fa fa-save"></i>
-                        &nbsp;Simpan
-                    </button>
-                </div>
-            </div>-->
+            <!--            <div class="card-footer">
+                            <div class="pull-right">
+                                <button type="submit" class="btn btn-secondary btn-sm" ng-click="cancel()">
+                                    <i class="fa fa-arrow-left"></i>
+                                    &nbsp;Kembali
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-sm" ng-hide="is_view" button-spinner="loading" ng-disabled="cek <= 3 || loading" ng-click="save(form)">
+                                    <i class="fa fa-save"></i>
+                                    &nbsp;Simpan
+                                </button>
+                            </div>
+                        </div>-->
         </div>
         <div class="app-footer" style="background-color: #29363d;left:0;bottom: 0;position: fixed;padding:10px 0px;width: 100%;padding-left: 20px;color: #fff;"ng-if="is_edit">
             <div class="col-md-10" style="padding: 0px;">

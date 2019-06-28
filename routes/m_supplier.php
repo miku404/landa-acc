@@ -3,15 +3,27 @@
 function validasi($data, $custom = array())
 {
     $validasi = array(
-//        'parent_id' => 'required',
-//        'kode'      => 'required',
-//        'nama'      => 'required',
-        // 'tipe' => 'required',
+        'tlp' => 'required',
+        'email'      => 'required',
+        'nama'      => 'required',
+        'alamat' => 'required'
     );
-//    GUMP::set_field_name("parent_id", "Akun");
+    GUMP::set_field_name("tlp", "No Telepon");
     $cek = validate($data, $validasi, $custom);
     return $cek;
 }
+
+$app->get('/acc/m_supplier/getSupplier', function ($request, $response) {
+    $db = $this->db;
+    $models = $db->select("*")
+                ->from("m_supplier")
+                ->orderBy('m_supplier.nama')
+                ->where("is_deleted", "=", 0)
+                ->findAll();
+    return successResponse($response, [
+      'list'        => $models
+    ]);
+});
 
 $app->get('/acc/m_supplier/index', function ($request, $response) {
     $params = $request->getParams();

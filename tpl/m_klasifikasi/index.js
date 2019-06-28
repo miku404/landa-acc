@@ -14,6 +14,13 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
     /**
      * End inialisasi
      */
+
+    Data.get(control_link + '/list').then(function (data) {
+
+        $scope.parent = data.data.list;
+        console.log($scope.parent);
+    });
+
     $scope.callServer = function callServer(tableState) {
         tableStateRef = tableState;
         $scope.isLoading = true;
@@ -30,11 +37,7 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
         if (tableState.search.predicateObject) {
             param["filter"] = tableState.search.predicateObject;
         }
-        Data.get(control_link + '/list').then(function (data) {
 
-            $scope.parent = data.data.list;
-            console.log($scope.parent);
-        });
         Data.get(control_link + "/index", param).then(function (response) {
             $scope.displayed = response.data.list;
 //            $scope.parent = response.data.list;
@@ -65,15 +68,15 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
                 file.upload.then(function (response) {
                     var data = response.data;
                     if (data.status_code == 200) {
+                        $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
                         $scope.callServer(tableStateRef);
-                        toaster.pop('success', "Berhasil", "Data berhasil tersimpan");
                     } else {
-                        toaster.pop('error', "Terjadi Kesalahan", "Data gagal di import");
+                        $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
                     }
                 });
             });
         } else {
-            toaster.pop('error', "Terjadi Kesalahan", result.errors);
+            $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
         }
     };
     /**export*/
@@ -112,18 +115,10 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
         var url = (form.id > 0) ? '/update' : '/create';
         Data.post(control_link + url, form).then(function (result) {
             if (result.status_code == 200) {
-
-
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.cancel();
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors), "error");
             }
         });
     };
@@ -149,13 +144,8 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -175,13 +165,8 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
             if (result.value) {
                 row.is_deleted = 0;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Restore",
-                        text: "Data Berhasil Di Restore.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil direstore", "success");
+                    $scope.cancel();
 
                 });
             }
@@ -201,13 +186,8 @@ app.controller("klasifikasiCtrl", function ($scope, Data, $rootScope, Upload) {
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/delete', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus Permanen.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus permanen", "success");
+                    $scope.cancel();
 
                 });
             }
