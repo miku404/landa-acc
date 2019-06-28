@@ -1,6 +1,6 @@
 app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Upload) {
     var tableStateRef;
-    var control_link = "acc/m_supplier";
+    var control_link = "acc/m_asset";
     var master = 'Master Asset';
     $scope.formTitle = '';
     $scope.displayed = [];
@@ -36,6 +36,11 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         $scope.isLoading = false;
     };
 
+    Data.get('acc/m_lokasi/index', {filter:{is_deleted:0}}).then(function (response) {
+        $scope.listLokasi = response.data.list;
+    });
+        
+
     /** create */
     $scope.create = function () {
         $scope.is_edit = true;
@@ -44,8 +49,9 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         $scope.is_disable = false;
         $scope.formtitle = master + " | Form Tambah Data";
         $scope.form = {};
+        $scope.form.tanggal = new Date();
     };
-    $scope.create();
+    // $scope.create();
     /** update */
     $scope.update = function (form) {
         $scope.is_edit = true;
@@ -54,6 +60,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
         $scope.is_disable = true;
         $scope.formtitle = master + " | Edit Data : " + form.nama;
         $scope.form = form;
+        $scope.form.tanggal = new Date(form.tanggal_beli);
+        $scope.form.harga = form.harga_beli;
         console.log(form);
     };
     /** view */
@@ -66,21 +74,13 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
     };
     /** save action */
     $scope.save = function (form) {
-        var url = (form.id > 0) ? '/update' : '/create';
-        Data.post(control_link + url, form).then(function (result) {
+        Data.post(control_link + "/save", form).then(function (result) {
             if (result.status_code == 200) {
-
-
-                Swal.fire({
-                    title: "Tersimpan",
-                    text: "Data Berhasil Di Simpan.",
-                    type: "success"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
+                $rootScope.alert("Berhasil", "Data berhasil disimpan", "success");
+                $scope.callServer(tableStateRef);
+                $scope.is_edit = false;
             } else {
-                Swal.fire("Gagal", result.errors, "error");
+                $rootScope.alert("Terjadi Kesalahan", setErrorMessage(result.errors) ,"error");
             }
         });
     };
@@ -106,14 +106,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
-
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus", "success");
+                    $scope.cancel();
                 });
             }
         });
@@ -132,14 +126,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 0;
                 Data.post(control_link + '/trash', row).then(function (result) {
-                    Swal.fire({
-                        title: "Restore",
-                        text: "Data Berhasil Di Restore.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
-
+                    $rootScope.alert("Berhasil", "Data berhasil direstore", "success");
+                    $scope.cancel();
                 });
             }
         });
@@ -158,14 +146,8 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
             if (result.value) {
                 row.is_deleted = 1;
                 Data.post(control_link + '/delete', row).then(function (result) {
-                    Swal.fire({
-                        title: "Terhapus",
-                        text: "Data Berhasil Di Hapus Permanen.",
-                        type: "success"
-                    }).then(function () {
-                        $scope.cancel();
-                    });
-
+                    $rootScope.alert("Berhasil", "Data berhasil dihapus Permanen", "success");
+                    $scope.cancel();
                 });
             }
         });

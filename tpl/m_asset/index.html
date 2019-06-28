@@ -54,23 +54,17 @@
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <!-- <th style="text-align: left; width: 3%">
-                                No
-                                </th> -->
                                 <th style="text-align: left;">
-                                    Nama  Supplier
-                                </th>
-                                <!-- <th style="text-align: left;">
                                     Nama
-                                </th> -->
-                                <th style="text-align: left;">
-                                    No Telepon
                                 </th>
                                 <th style="text-align: left;">
-                                    Email
+                                    Tgl Beli
                                 </th>
                                 <th style="text-align: left;">
-                                    Alamat
+                                    Harga Beli
+                                </th>
+                                <th style="text-align: left;">
+                                    Lokasi
                                 </th>
                                 <th>
                                 </th>
@@ -81,17 +75,14 @@
                                 <td style="text-align: left;">
                                     {{row.nama}}
                                 </td>
-                                <!--  <td style="text-align: left;">
-                                    {{row.tipe}}
-                                </td> -->
                                 <td style="text-align: left;">
-                                    {{row.tlp}}
+                                    {{row.tanggal_beli}}
                                 </td>
                                 <td style="text-align: left;">
-                                    {{row.email}}
+                                    {{row.harga_beli}}
                                 </td>
                                 <td style="text-align: left;">
-                                    {{row.alamat}}
+                                    {{row.nm_lokasi}}
                                 </td>
                                 <td>
                                     <div class="btn-group pull-right" role="group">
@@ -124,7 +115,7 @@
                         <div class="col-md-6">
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">
+                                    <label class="col-sm-3 col-form-label-sm required">
                                         Nama Item
                                     </label>
                                     <div class="col-sm-9">
@@ -150,7 +141,7 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">
+                                    <label class="col-sm-3 col-form-label-sm required">
                                         Harga Beli
                                     </label>
                                     <div class="col-sm-9">
@@ -158,7 +149,7 @@
                                             <div class="input-group-text">
                                                 Rp.
                                             </div>
-                                            <input class="form-control form-control-sm text-right" name="" ng-disabled="true" ng-model="form.harga" type="text" ui-number-mask="0">
+                                            <input class="form-control form-control-sm text-right" name="" ng-disabled="is_view" ng-model="form.harga" type="text" ui-number-mask="0">
                                             </input>
                                         </div>
                                     </div>
@@ -176,11 +167,18 @@
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm">
+                                    <label class="col-sm-3 col-form-label-sm required">
                                         Lokasi
                                     </label>
                                     <div class="col-sm-9">
-                                        <input class="form-control form-control-sm" ng-disabled="is_view" ng-model="form.nama" required="" type="text"/>
+                                        <ui-select class="w100" ng-disabled="is_view" ng-model="form.lokasi"  theme="bootstrap">
+                                        <ui-select-match placeholder="Pilih Lokasi">
+                                            {{ $select.selected.nama }}
+                                        </ui-select-match>
+                                        <ui-select-choices position="down" repeat="lb in listLokasi| filter :$select.search">
+                                            {{ lb.nama }}
+                                        </ui-select-choices>
+                                    </ui-select>
                                     </div>
                                 </div>
                             </div>
