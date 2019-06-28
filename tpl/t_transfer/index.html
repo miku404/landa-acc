@@ -123,16 +123,18 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="col-md-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-3 col-form-label-sm required">Lokasi</label>
-                                    <div class="col-sm-9">
-                                        <select class="form-control form-control-sm" id="fakultas" ng-disabled="is_view" ng-model="form.m_lokasi_id">
-
-                                            <option ng-repeat="val in listLokasi" ng-value="val.id" ng-selected="form.m_lokasi_id == val.id">{{val.nama}}</option>
-                                        </select>
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 col-form-label-sm required">Lokasi</label>
+                                            <div class="col-sm-9">
+                                                <ui-select class="ui-select-sm ui-select-container" ng-change="kode(form.m_lokasi_id)" ng-model="form.m_lokasi_id" theme="bootstrap" ng-disabled="is_view">
+                                                    <ui-select-match placeholder="Pilih Lokasi">
+                                                        {{ $select.selected.kode + " - " + $select.selected.nama}}
+                                                    </ui-select-match>
+                                                    <ui-select-choices position="down" repeat="val in listLokasi | filter : $select.search">{{val.kode + " - " + val.nama}}</ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
                                     <label class="col-sm-3 col-form-label-sm">No Transaksi</label>

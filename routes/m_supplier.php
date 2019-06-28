@@ -21,8 +21,8 @@ $app->get('/acc/m_supplier/index', function ($request, $response) {
 
     $db = $this->db;
     $db->select("*")
-        ->from("acc_supplier")
-        ->orderBy('acc_supplier.nama');
+        ->from("m_supplier")
+        ->orderBy('m_supplier.nama');
 
     if (isset($params['filter'])) {
         $filter = (array) json_decode($params['filter']);
@@ -68,7 +68,7 @@ $app->post('/acc/m_supplier/create', function ($request, $response) {
 
     $validasi = validasi($data);
     if ($validasi === true) {
-        $model = $sql->insert("acc_supplier", $params);
+        $model = $sql->insert("m_supplier", $params);
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -90,7 +90,7 @@ $app->post('/acc/m_supplier/update', function ($request, $response) {
 
         
 
-        $model = $db->update("acc_supplier", $data, array('id' => $data['id']));
+        $model = $db->update("m_supplier", $data, array('id' => $data['id']));
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -124,7 +124,7 @@ $app->post('/acc/m_supplier/trash', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $model = $db->update("acc_supplier", $data, array('id' => $data['id']));
+    $model = $db->update("m_supplier", $data, array('id' => $data['id']));
     if ($model) {
         return successResponse($response, $model);
     } else {
@@ -163,7 +163,7 @@ $app->post('/acc/m_supplier/delete', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $delete = $db->delete('acc_supplier', array('id' => $data['id']));
+    $delete = $db->delete('m_supplier', array('id' => $data['id']));
        if ($delete) {
            return successResponse($response, ['data berhasil dihapus']);
        } else {

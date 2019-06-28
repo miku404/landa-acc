@@ -125,6 +125,7 @@ $app->get('/acc/t_tutup_bulan/getDetail', function ($request, $response) {
                     ->find();
 
             if(($getTransDetail->debit != NULL && $getTransDetail->debit != 0) || ($getTransDetail->kredit != NULL && $getTransDetail->kredit != 0)){
+                $detail[$key1]['m_akun_id'] = $val1->id;
                 $detail[$key1]['nama'] = $val1->nama;
                 $detail[$key1]['debit'] = $getTransDetail->debit;
                 $detail[$key1]['kredit'] = $getTransDetail->kredit;
@@ -150,56 +151,75 @@ $app->get('/acc/t_tutup_bulan/getDetail', function ($request, $response) {
 
 
 
-$app->post('/acc/t_pengeluaran/create', function ($request, $response) {
+$app->post('/acc/t_tutup_bulan/create', function ($request, $response) {
 
     $params = $request->getParams();
     $data = $params;
 //    print_r($data);die();
+    $tanggal = $data['form']['tahun'] . "-" . $data['form']['bulan'] . "-01";
+    $tanggal = date("Y-m-t", strtotime($tanggal));
+    $detail = [];
+    foreach($data['detail'] as $detail1 => $detail2){
+        foreach($detail2['detail'] as $detaill => $detailll){
+            $detail[$detaill] = $detailll;
+        }
+        
+    }
+//    print_r($detail);die();
     $sql = $this->db;
     $validasi = validasi($data);
     if ($validasi === true) {
-        $getNoUrut = $sql->select("*")->from("acc_pengeluaran")->orderBy("no_urut DESC")->find();
-        $insert['no_urut'] = 1;
-        if ($getNoUrut) {
-            $insert['no_urut'] = $getNoUrut->no_urut + 1;
+        $cekData = $sql->select("*")->from("acc_tutup_buku")
+                ->where("jenis", "=", "bulan")
+                ->where("tahun", "=", $data['form']['tahun'])
+                ->where("bulan", "=", $data['form']['bulan'])
+                ->count();
+        if($cekData > 0){
+            return unprocessResponse($response, 'Data Sudah Ada');
+            die();
         }
-
-        $insert['no_transaksi'] = $data['form']['no_transaksi'];
-        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
-        $insert['m_akun_id'] = $data['form']['m_akun_id']['id'];
-        $insert['dibayar_kepada'] = $data['form']['dibayar_kepada'];
-        $insert['tanggal'] = date("Y-m-d h:i:s", strtotime($data['form']['tanggal']));
-        $insert['total'] = $data['form']['total'];
-        $model = $sql->insert("acc_pengeluaran", $insert);
-
-        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
-        $insert2['m_akun_id'] = $data['form']['m_akun_id']['id'];
-        $insert2['tanggal'] = date("Y-m-d", strtotime($data['form']['tanggal']));
-        $insert2['kredit'] = $data['form']['total'];
-        $insert2['reff_type'] = "Pengeluaran Header";
-        $insert2['reff_id'] = $model->id;
-        $model2 = $sql->insert("acc_trans_detail", $insert2);
-//        die();
-        if ($model && $model2) {
-            foreach ($data['detail'] as $key => $val) {
-                $detail['m_akun_id'] = $val['m_akun_id']['id'];
-                $detail['debit'] = $val['debit'];
-                $detail['acc_pengeluaran_id'] = $model->id;
-                $detail['keterangan'] = $val['keterangan'];
-                $modeldetail = $sql->insert("acc_pengeluaran_det", $detail);
-
-                $detail2['m_akun_id'] = $val['m_akun_id']['id'];
-                $detail2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
-                $detail2['tanggal'] = date("Y-m-d", strtotime($data['form']['tanggal']));
-                $detail2['debit'] = $val['debit'];
-                $detail2['reff_type'] = "Pengeluaran Detail";
-                $detail2['reff_id'] = $modeldetail->id;
-                $modeldetail2 = $sql->insert("acc_trans_detail", $detail2);
+        
+        $data['form']['jenis'] = "bulan";
+        $data['form']['akun_ikhtisar_id'] = $data['form']['akun_ikhtisar_id']['id'];
+        $data['form']['akun_pemindahan_modal_id'] = $data['form']['akun_pemindahan_modal_id']['id'];
+        
+        $model = $sql->insert("acc_tutup_buku", $data['form']);
+        
+        //trans_detail ikhtisar 
+        $transdet1['m_akun_id'] = $data['form']['akun_ikhtisar_id'];
+        $transdet1['tanggal'] = $tanggal;
+        $transdet1['kredit'] = $data['total_kredit'];
+        $transdet1['reff_type'] = "Tutup Bulan";
+        $transdet1['reff_id'] = $model->id;
+        
+        $model2 = $sql->insert("acc_trans_detail", $transdet1);
+        
+        //trans_detail pemindahan
+        $transdet1['m_akun_id'] = $data['form']['akun_pemindahan_modal_id'];
+        $transdet1['tanggal'] = $tanggal;
+        $transdet1['debit'] = $data['total_debit'];
+        $transdet1['reff_type'] = "Tutup Bulan";
+        $transdet1['reff_id'] = $model->id;
+        
+        $model3 = $sql->insert("acc_trans_detail", $transdet1);
+        
+        if($model && $model2 && $model3){
+            $sql->insert("acc_m_setting", ['tanggal'=>$tanggal]);
+            foreach($detail as $key => $val){
+                $det['acc_tutup_buku_id'] = $model->id;
+                $det['m_akun_id'] = $val['m_akun_id'];
+                $det['debit'] = $val['debit'];
+                $det['kredit'] = $val['kredit'];
+                
+                $model4 = $sql->insert("acc_tutup_buku_det", $det);
             }
             return successResponse($response, $model);
         } else {
-            return unprocessResponse($response, ['Data Gagal Di Simpan']);
+            return unprocessResponse($response, 'Data Gagal Di Simpan');
         }
+            
+        
+        
     } else {
         return unprocessResponse($response, $validasi);
     }

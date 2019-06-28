@@ -113,9 +113,9 @@ $app->get('/acc/t_jurnal_umum/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_jurnal.*, m_lokasi.id as idLokasi, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, acc_user.nama as namaUser")
+    $db->select("acc_jurnal.*, m_lokasi.id as idLokasi, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser")
         ->from("acc_jurnal")
-        ->join("join", "acc_user", "acc_jurnal.created_by = acc_user.id")
+        ->join("join", "m_user", "acc_jurnal.created_by = m_user.id")
         ->join("join", "m_lokasi", "m_lokasi.id = acc_jurnal.m_lokasi_id")
         ->orderBy('acc_jurnal.no_urut');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);

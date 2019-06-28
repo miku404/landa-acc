@@ -88,7 +88,7 @@ $app->get('/acc/t_penerimaan/kode/{kode}', function ($request, $response) {
 
 $app->get('/acc/t_penerimaan/akunKas', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("acc_akun")
+    $models = $db->select("*")->from("m_akun")
             ->where("tipe", "=", "Cash & Bank")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
@@ -102,7 +102,7 @@ $app->get('/acc/t_penerimaan/akunKas', function ($request, $response){
 
 $app->get('/acc/t_penerimaan/akunDetail', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("acc_akun")
+    $models = $db->select("*")->from("m_akun")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
             ->findAll();
@@ -115,9 +115,9 @@ $app->get('/acc/t_penerimaan/getDetail', function ($request, $response){
     $params = $request->getParams();
 //    print_r($params);die();
     $db = $this->db;
-    $models = $db->select("acc_pemasukan_det.*, acc_akun.kode as kodeAkun, acc_akun.nama as namaAkun")
+    $models = $db->select("acc_pemasukan_det.*, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
             ->from("acc_pemasukan_det")
-            ->join("join", "acc_akun", "acc_akun.id = acc_pemasukan_det.m_akun_id")
+            ->join("join", "m_akun", "m_akun.id = acc_pemasukan_det.m_akun_id")
             ->where("acc_pemasukan_id", "=", $params['id'])
 //            ->where("acc_pemasukan_det.is_deleted", "=", 0)
             ->findAll();
@@ -137,10 +137,10 @@ $app->get('/acc/t_penerimaan/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_pemasukan.*, m_lokasi.nama as namaLokasi, acc_user.nama as namaUser, acc_akun.kode as kodeAkun, acc_akun.nama as namaAkun")
+    $db->select("acc_pemasukan.*, m_lokasi.id, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
         ->from("acc_pemasukan")
-        ->join("join", "acc_user", "acc_pemasukan.created_by = acc_user.id")
-        ->join("join", "acc_akun", "acc_pemasukan.m_akun_id = acc_akun.id")
+        ->join("join", "m_user", "acc_pemasukan.created_by = m_user.id")
+        ->join("join", "m_akun", "acc_pemasukan.m_akun_id = m_akun.id")
         ->join("join", "m_lokasi", "m_lokasi.id = acc_pemasukan.m_lokasi_id")
         ->orderBy('acc_pemasukan.no_urut');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);
@@ -174,6 +174,7 @@ $app->get('/acc/t_penerimaan/index', function ($request, $response) {
         $models[$key] = (array) $val;
         $models[$key]['created_at'] = date("Y-m-d h:i:s",$val->created_at);
         $models[$key]['m_akun_id'] = ["id" => $val->m_akun_id, "nama" => $val->namaAkun, "kode" => $val->kodeAkun];
+        $models[$key]['m_lokasi_id'] = ["id" => $val->m_lokasi_id, "nama" => $val->namaLokasi, "kode" => $val->kodeLokasi];
     }
 //     print_r($models);exit();
 //    die();
@@ -202,14 +203,14 @@ $app->post('/acc/t_penerimaan/create', function ($request, $response) {
         }
         
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
-        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert['diterima_dari'] = $data['form']['diterima_dari'];
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
         $insert['total'] = $data['form']['total'];
         $model = $sql->insert("acc_pemasukan", $insert);
         
-        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert2['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert2['debit'] = $data['form']['total'];
@@ -253,7 +254,7 @@ $app->post('/acc/t_penerimaan/update', function ($request, $response) {
         //update acc_pemasukan
         $insert['no_urut'] = $data['form']['no_urut'];
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
-        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert['diterima_dari'] = $data['form']['diterima_dari'];
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
@@ -261,7 +262,7 @@ $app->post('/acc/t_penerimaan/update', function ($request, $response) {
         $model = $sql->update("acc_pemasukan", $insert, ["id" => $data['form']['id']]);
         
         //update acc_trans_detail dari acc_pemasukan
-        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert2['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert2['debit'] = $data['form']['total'];

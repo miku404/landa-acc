@@ -1,47 +1,16 @@
-app.controller('tutupbulanCtrl', function ($scope, Data, $rootScope, $uibModal, Upload) {
+app.controller('customerCtrl', function ($scope, Data, $rootScope, $uibModal, Upload) {
     var tableStateRef;
-    var control_link = "acc/t_tutup_bulan";
-    var master = 'Transaksi Tutup Bulan';
+    var control_link = "acc/m_customer";
+    var master = 'Master Customer';
     $scope.formTitle = '';
     $scope.displayed = [];
     $scope.base_url = '';
     $scope.is_edit = false;
     $scope.is_view = false;
 
-    Data.get('acc/m_akun/akunDetail').then(function(data) {
-        $scope.listAkun = data.data.list;
-    });
-    
-    Data.get('acc/t_tutup_bulan/tahun').then(function (response) {
-            $scope.listTahun = response.data;
-        });
-
-    
-    $scope.getDetail = function (){
-        console.log("ya")
-        var data = $scope.form;
-        if ((data.bulan != undefined) && (data.tahun != undefined) && (data.akun_ikhtisar_id != undefined) && (data.akun_pemindahan_modal_id != undefined)) {
-            Data.get('acc/t_tutup_bulan/getDetail', data).then(function (response) {
-                $scope.listDetail  = response.data.list;
-                $scope.total_debit = response.data.total_debit;
-                $scope.total_kredit = response.data.total_kredit;
-                $scope.nama_debit = data.akun_pemindahan_modal_id.nama;
-                $scope.nama_kredit = data.akun_ikhtisar_id.nama;
-            });
-        }
-
-    }
-    
-    
-    $scope.sumTotal = function () {
-        console.log("ya")
-        var totaldebit = 0;
-        angular.forEach($scope.listDetail, function (value, key) {
-            totaldebit += parseInt(value.debit);
-        });
-        console.log(totaldebit)
-        $scope.form.total = totaldebit;
-    };
+//    Data.get(control_link + '/cabang').then(function(data) {
+//        $scope.cabang = data.data.data;
+//    });
 
     $scope.master = master;
     $scope.callServer = function callServer(tableState) {
@@ -60,7 +29,6 @@ app.controller('tutupbulanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         if (tableState.search.predicateObject) {
             param['filter'] = tableState.search.predicateObject;
         }
-        
         Data.get(control_link + '/index', param).then(function (response) {
             $scope.displayed = response.data.list;
             $scope.base_url = response.data.base_url;
@@ -76,7 +44,6 @@ app.controller('tutupbulanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         $scope.is_disable = false;
         $scope.formtitle = master + " | Form Tambah Data";
         $scope.form = {};
-        $scope.listDetail = [{}];
     };
     /** update */
     $scope.update = function (form) {
@@ -84,12 +51,9 @@ app.controller('tutupbulanCtrl', function ($scope, Data, $rootScope, $uibModal, 
         $scope.is_view = false;
         $scope.is_update = true;
         $scope.is_disable = true;
-        $scope.formtitle = master + " | Edit Data : " + form.no_transaksi;
+        $scope.formtitle = master + " | Edit Data : " + form.nama;
         $scope.form = form;
-        $scope.form.tanggal = new Date(form.tanggal);
-        $scope.getDetail(form.id);
-        console.log($scope.form);
-        
+        console.log(form);
     };
     /** view */
     $scope.view = function (form) {
@@ -101,19 +65,8 @@ app.controller('tutupbulanCtrl', function ($scope, Data, $rootScope, $uibModal, 
     };
     /** save action */
     $scope.save = function (form) {
-        
-        form['hasil_lr'] = parseInt($scope.total_debit)-parseInt($scope.total_kredit);
-        console.log(form)
-        console.log($scope.listDetail)
-        
-        var data = {
-            form : form,
-            detail : $scope.listDetail,
-            total_debit : $scope.total_debit,
-            total_kredit : $scope.total_kredit
-        }
-        
-        Data.post(control_link + '/create', data).then(function (result) {
+        var url = (form.id > 0) ? '/update' : '/create';
+        Data.post(control_link + url, form).then(function (result) {
             if (result.status_code == 200) {
 
 
@@ -126,15 +79,7 @@ app.controller('tutupbulanCtrl', function ($scope, Data, $rootScope, $uibModal, 
                     $scope.is_edit = false;
                 });
             } else {
-                Swal.fire({
-                    title: "Gagal",
-                    text: result.errores,
-                    type: "error"
-                }).then(function () {
-                    $scope.callServer(tableStateRef);
-                    $scope.is_edit = false;
-                });
-                
+                Swal.fire("Gagal", result.errors, "error");
             }
         });
     };

@@ -31,14 +31,14 @@ $app->get('/acc/l_budgeting/getBudgeting', function ($request, $response) {
     $tahun = date('Y', strtotime($params['tahun'])) + 1;
     $db = $this->db;
     
-    $db->select("acc_akun.*, induk.nama as nama_induk, induk.kode as kode_induk")
-        ->from("acc_akun")
-        ->leftJoin("acc_akun as induk", "induk.id = acc_akun.parent_id")
-        ->orderBy('acc_akun.kode')
-            ->where("acc_akun.is_deleted", "=", 0)
-            ->where("acc_akun.is_tipe", "=", 0);
+    $db->select("m_akun.*, induk.nama as nama_induk, induk.kode as kode_induk")
+        ->from("m_akun")
+        ->leftJoin("m_akun as induk", "induk.id = m_akun.parent_id")
+        ->orderBy('m_akun.kode')
+            ->where("m_akun.is_deleted", "=", 0)
+            ->where("m_akun.is_tipe", "=", 0);
     if(isset($params['nama']) && $params['nama'] != ""){
-        $db->where("acc_akun.nama", "LIKE", $params['nama']);
+        $db->where("m_akun.nama", "LIKE", $params['nama']);
     }
       $getAkun = $db->findAll();
 //    print_r($getAkun);die();
@@ -106,14 +106,14 @@ $app->get('/acc/l_budgeting/exportExcel', function ($request, $response) {
 //    echo $tahun;die();
     $db = $this->db;
     
-    $db->select("acc_akun.*, induk.nama as nama_induk, induk.kode as kode_induk")
-        ->from("acc_akun")
-        ->leftJoin("acc_akun as induk", "induk.id = acc_akun.parent_id")
-        ->orderBy('acc_akun.kode')
-            ->where("acc_akun.is_deleted", "=", 0)
-            ->where("acc_akun.is_tipe", "=", 0);
+    $db->select("m_akun.*, induk.nama as nama_induk, induk.kode as kode_induk")
+        ->from("m_akun")
+        ->leftJoin("m_akun as induk", "induk.id = m_akun.parent_id")
+        ->orderBy('m_akun.kode')
+            ->where("m_akun.is_deleted", "=", 0)
+            ->where("m_akun.is_tipe", "=", 0);
     if(isset($params['nama']) && $params['nama'] != ""){
-        $db->where("acc_akun.nama", "LIKE", $params['nama']);
+        $db->where("m_akun.nama", "LIKE", $params['nama']);
     }
       $getAkun = $db->findAll();
 //    print_r($getAkun);die();

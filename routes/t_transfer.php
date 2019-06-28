@@ -15,7 +15,7 @@ function validasi($data, $custom = array())
 
 $app->get('/acc/t_transfer/akunKas', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("acc_akun")
+    $models = $db->select("*")->from("m_akun")
             ->where("tipe", "=", "Cash & Bank")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
@@ -34,11 +34,11 @@ $app->get('/acc/t_transfer/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_transfer.*, m_lokasi.nama as namaLokasi, acc_user.nama as namaUser, akun2.id as idTujuan, akun2.nama as namaTujuan, akun2.kode as kodeTujuan, akun1.id as idAsal, akun1.nama as namaAsal, akun1.kode as kodeAsal")
+    $db->select("acc_transfer.*, m_lokasi.nama as namaLokasi, m_lokasi.kode as kodeLokasi, m_user.nama as namaUser, akun2.id as idTujuan, akun2.nama as namaTujuan, akun2.kode as kodeTujuan, akun1.id as idAsal, akun1.nama as namaAsal, akun1.kode as kodeAsal")
         ->from("acc_transfer")
-        ->join("join", "acc_user", "acc_transfer.created_by = acc_user.id")
-        ->join("join", "acc_akun akun1", "acc_transfer.m_akun_asal_id = akun1.id")
-        ->join("join", "acc_akun akun2", "acc_transfer.m_akun_tujuan_id = akun2.id")
+        ->join("join", "m_user", "acc_transfer.created_by = m_user.id")
+        ->join("join", "m_akun akun1", "acc_transfer.m_akun_asal_id = akun1.id")
+        ->join("join", "m_akun akun2", "acc_transfer.m_akun_tujuan_id = akun2.id")
         ->join("join", "m_lokasi", "acc_transfer.m_lokasi_id = m_lokasi.id")
         ->orderBy('acc_transfer.no_urut');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);
@@ -48,7 +48,7 @@ $app->get('/acc/t_transfer/index', function ($request, $response) {
 
         foreach ($filter as $key => $val) {
             if ($key == 'is_deleted') {
-                $db->where("is_deleted", '=', $val);
+                $db->where("acc_transfer.is_deleted", '=', $val);
             }else{
                 $db->where($key, 'LIKE', $val);
             }
@@ -73,6 +73,8 @@ $app->get('/acc/t_transfer/index', function ($request, $response) {
         $models[$key]['created_at'] = date("Y-m-d h:i:s",$val->created_at);
         $models[$key]['m_akun_asal_id'] = ["id" => $val->idAsal, "nama" => $val->namaAsal, "kode" => $val->kodeAsal];
         $models[$key]['m_akun_tujuan_id'] = ["id" => $val->idTujuan, "nama" => $val->namaTujuan, "kode" => $val->kodeTujuan];
+        $models[$key]['m_lokasi_id'] = ["id" => $val->m_lokasi_id, "nama" => $val->namaLokasi, "kode" => $val->kodeLokasi];
+        
     }
 //     print_r($models);exit();
 //    die();
@@ -101,7 +103,7 @@ $app->post('/acc/t_transfer/create', function ($request, $response) {
         }
         
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
-        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert['m_akun_asal_id'] = $data['form']['m_akun_asal_id']['id'];
         $insert['m_akun_tujuan_id'] = $data['form']['m_akun_tujuan_id']['id'];
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
@@ -109,7 +111,7 @@ $app->post('/acc/t_transfer/create', function ($request, $response) {
         $insert['keterangan'] = $data['form']['keterangan'];
         $model = $sql->insert("acc_transfer", $insert);
         
-        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert2['m_akun_id'] = $data['form']['m_akun_tujuan_id']['id'];
         $insert2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert2['debit'] = $data['form']['total'];
@@ -117,7 +119,7 @@ $app->post('/acc/t_transfer/create', function ($request, $response) {
         $insert2['reff_id'] = $model->id;
         $model2 = $sql->insert("acc_trans_detail", $insert2);
         
-        $insert3['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert3['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert3['m_akun_id'] = $data['form']['m_akun_asal_id']['id'];
         $insert3['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert3['kredit'] = $data['form']['total'];
@@ -148,7 +150,7 @@ $app->post('/acc/t_transfer/update', function ($request, $response) {
         //update acc_pemasukan
         $insert['no_urut'] = $data['form']['no_urut'];
         $insert['no_transaksi'] = $data['form']['no_transaksi'];
-        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert['diterima_dari'] = $data['form']['diterima_dari'];
         $insert['tanggal'] = date("Y-m-d h:i:s",strtotime($data['form']['tanggal']));
@@ -156,7 +158,7 @@ $app->post('/acc/t_transfer/update', function ($request, $response) {
         $model = $sql->update("acc_pemasukan", $insert, ["id" => $data['form']['id']]);
         
         //update acc_trans_detail dari acc_pemasukan
-        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id'];
+        $insert2['m_lokasi_id'] = $data['form']['m_lokasi_id']['id'];
         $insert2['m_akun_id'] = $data['form']['m_akun_id']['id'];
         $insert2['tanggal'] = date("Y-m-d",strtotime($data['form']['tanggal']));
         $insert2['debit'] = $data['form']['total'];

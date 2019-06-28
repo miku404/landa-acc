@@ -86,38 +86,14 @@ $app->get('/acc/t_pengeluaran/kode/{kode}', function ($request, $response) {
     return successResponse($response, [ "kode" => $kode_unit_1 . date("y"). "PNGL" . $no_urut, "urutan" => $no_urut]);
 });
 
-$app->get('/acc/t_pengeluaran/akunKas', function ($request, $response){
-    $db = $this->db;
-    $models = $db->select("*")->from("acc_akun")
-            ->where("tipe", "=", "Cash & Bank")
-            ->where("is_tipe", "=", 0)
-            ->where("is_deleted", "=", 0)
-            ->findAll();
-    
-    
-    return successResponse($response, [
-      'list'        => $models
-    ]);
-});
-
-$app->get('/acc/t_pengeluaran/akunDetail', function ($request, $response){
-    $db = $this->db;
-    $models = $db->select("*")->from("acc_akun")
-            ->where("is_tipe", "=", 0)
-            ->where("is_deleted", "=", 0)
-            ->findAll();
-    return successResponse($response, [
-      'list'        => $models
-    ]);
-});
 
 $app->get('/acc/t_pengeluaran/getDetail', function ($request, $response){
     $params = $request->getParams();
 //    print_r($params);die();
     $db = $this->db;
-    $models = $db->select("acc_pengeluaran_det.*, acc_akun.kode as kodeAkun, acc_akun.nama as namaAkun")
+    $models = $db->select("acc_pengeluaran_det.*, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
             ->from("acc_pengeluaran_det")
-            ->join("join", "acc_akun", "acc_akun.id = acc_pengeluaran_det.m_akun_id")
+            ->join("join", "m_akun", "m_akun.id = acc_pengeluaran_det.m_akun_id")
             ->where("acc_pengeluaran_id", "=", $params['id'])
 //            ->where("acc_pemasukan_det.is_deleted", "=", 0)
             ->findAll();
@@ -137,10 +113,10 @@ $app->get('/acc/t_pengeluaran/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_pengeluaran.*, m_lokasi.nama as namaLokasi, acc_user.nama as namaUser, acc_akun.kode as kodeAkun, acc_akun.nama as namaAkun")
+    $db->select("acc_pengeluaran.*, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
         ->from("acc_pengeluaran")
-        ->join("join", "acc_user", "acc_pengeluaran.created_by = acc_user.id")
-        ->join("join", "acc_akun", "acc_pengeluaran.m_akun_id = acc_akun.id")
+        ->join("join", "m_user", "acc_pengeluaran.created_by = m_user.id")
+        ->join("join", "m_akun", "acc_pengeluaran.m_akun_id = m_akun.id")
         ->join("join", "m_lokasi", "m_lokasi.id = acc_pengeluaran.m_lokasi_id")
         ->orderBy('acc_pengeluaran.no_urut');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);
@@ -174,9 +150,10 @@ $app->get('/acc/t_pengeluaran/index', function ($request, $response) {
         $models[$key] = (array) $val;
         $models[$key]['created_at'] = date("Y-m-d h:i:s",$val->created_at);
         $models[$key]['m_akun_id'] = ["id" => $val->m_akun_id, "nama" => $val->namaAkun, "kode" => $val->kodeAkun];
+        $models[$key]['m_lokasi_id'] = ["id" => $val->m_lokasi_id, "nama" => $val->namaLokasi, "kode" => $val->kodeLokasi];
     }
 //     print_r($models);exit();
-    die();
+//    die();
 //      print_r($arr);exit();
     return successResponse($response, [
       'list'        => $models,

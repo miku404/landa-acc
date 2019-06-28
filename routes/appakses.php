@@ -20,7 +20,7 @@ $app->get("/acc/appakses/index", function ($request, $response) {
     $params = $request->getParams();
     $db     = $this->db;
     $db->select("*")
-        ->from("acc_roles");
+        ->from("m_roles");
     /**
      * Filter
      */
@@ -57,9 +57,9 @@ $app->post("/acc/appakses/save", function ($request, $response) {
         try {
             $data["akses"] = json_encode($data["akses"]);
             if (isset($data["id"])) {
-                $model = $db->update("acc_roles", $data, ["id" => $data["id"]]);
+                $model = $db->update("m_roles", $data, ["id" => $data["id"]]);
             } else {
-                $model = $db->insert("acc_roles", $data);
+                $model = $db->insert("m_roles", $data);
             }
             return successResponse($response, $model);
         } catch (Exception $e) {
@@ -78,7 +78,7 @@ $app->post("/acc/appakses/saveStatus", function ($request, $response) {
     if ($validasi === true) {
         try {
             $data["akses"] = json_encode($data["akses"]);
-            $model         = $db->update("acc_roles", $data, ["id" => $data["id"]]);
+            $model         = $db->update("m_roles", $data, ["id" => $data["id"]]);
             return successResponse($response, $model);
         } catch (Exception $e) {
             return unprocessResponse($response, ["terjadi masalah pada server"]);
