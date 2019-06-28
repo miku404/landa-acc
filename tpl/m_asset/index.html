@@ -132,13 +132,19 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="col-md-12">
+                            <div class="col-md-12">
                                 <div class="form-group row">
                                     <label class="col-sm-3 col-form-label-sm">
                                         Tanggal Beli
                                     </label>
                                     <div class="col-sm-9">
-                                        <input class="form-control form-control-sm" ng-disabled="is_view" ng-model="form.nama" required="" type="text"/>
+                                        <div class="input-group input-group-sm">
+                                        <input class="form-control form-control-sm" is-open="opened.tanggal" ng-click="toggle($event, 'tanggal')" ng-model="form.tanggal" type="text" uib-datepicker-popup="dd-MM-yyyy"/>
+                                        <div class="input-group-text">
+                                            <i class="icon icon-calendar">
+                                            </i>
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -148,10 +154,13 @@
                                         Harga Beli
                                     </label>
                                     <div class="col-sm-9">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Rp.</span>
-                                            <input class="form-control form-control-sm" ui-number-mask="0" ng-disabled="is_view" ng-model="form.harga_beli" type="text">
-                                      </div>
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-text">
+                                                Rp.
+                                            </div>
+                                            <input class="form-control form-control-sm text-right" name="" ng-disabled="true" ng-model="form.harga" type="text" ui-number-mask="0">
+                                            </input>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -183,9 +192,14 @@
                                         Pemeliharaan
                                     </label>
                                     <div class="col-sm-9">
-                                        <input class="form-control form-control-sm" ng-disabled="is_view" ng-model="form.pemeliharaan" required="" type="text"/>
+                                        <div class="input-group input-group-sm">
+                                            <input class="form-control form-control-sm" ng-disabled="is_view" ng-model="form.pemeliharaan" required="" type="text"/>
+                                            <div class="input-group-text">
+                                                Bulan
+                                            </div>
+                                        </div>
                                     </div>
-                                </div> 
+                                </div>
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group row">
