@@ -177,7 +177,7 @@ $app->get('/acc/l_laba_rugi/exportExcel', function ($request, $response) {
     }
 
 
-    $path = 'acc/landa-acc/upload/format_laba_rugi.xls';
+    $path = 'acc/landaacc/upload/format_laba_rugi.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
 

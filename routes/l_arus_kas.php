@@ -180,7 +180,7 @@ $app->get('/acc/l_arus_kas/exportExcel', function ($request, $response) {
 //    echo '<pre>',print_r($data), '</pre>';
 //    echo '<pre>',print_r($arr), '</pre>';die();
     
-    $path = 'acc/landa-acc/upload/format_arus_kas.xls';
+    $path = 'acc/landaacc/upload/format_arus_kas.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
 

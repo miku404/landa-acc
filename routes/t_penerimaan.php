@@ -12,7 +12,7 @@ $app->post('/acc/t_penerimaan/upload/{folder}', function ($request, $response) {
         $id_dokumen = $sql->find("select * from acc_dokumen_foto order by id desc");
         $gid = (isset($id_dokumen->id)) ? $id_dokumen->id + 1 : 1;
         $newName = $gid . "_" . urlParsing($_FILES['file']['name']);
-        $uploadPath = "acc/landa-acc/upload/" . $folder . DIRECTORY_SEPARATOR . $newName;
+        $uploadPath = "acc/landaacc/upload/" . $folder . DIRECTORY_SEPARATOR . $newName;
 
         move_uploaded_file($tempPath, $uploadPath);
 
@@ -92,7 +92,7 @@ $app->get('/acc/t_penerimaan/kode/{kode}', function ($request, $response) {
 
 $app->get('/acc/t_penerimaan/akunKas', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("m_akun")
+    $models = $db->select("*")->from("acc_m_akun")
             ->where("tipe", "=", "Cash & Bank")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
@@ -106,7 +106,7 @@ $app->get('/acc/t_penerimaan/akunKas', function ($request, $response){
 
 $app->get('/acc/t_penerimaan/akunDetail', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("m_akun")
+    $models = $db->select("*")->from("acc_m_akun")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
             ->findAll();
@@ -119,9 +119,9 @@ $app->get('/acc/t_penerimaan/getDetail', function ($request, $response){
     $params = $request->getParams();
 //    print_r($params);die();
     $db = $this->db;
-    $models = $db->select("acc_pemasukan_det.*, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
+    $models = $db->select("acc_pemasukan_det.*, acc_m_akun.kode as kodeAkun, acc_m_akun.nama as namaAkun")
             ->from("acc_pemasukan_det")
-            ->join("join", "m_akun", "m_akun.id = acc_pemasukan_det.m_akun_id")
+            ->join("join", "acc_m_akun", "acc_m_akun.id = acc_pemasukan_det.m_akun_id")
             ->where("acc_pemasukan_id", "=", $params['id'])
 //            ->where("acc_pemasukan_det.is_deleted", "=", 0)
             ->findAll();
@@ -141,11 +141,11 @@ $app->get('/acc/t_penerimaan/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_pemasukan.*, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
+    $db->select("acc_pemasukan.*, acc_m_lokasi.kode as kodeLokasi, acc_m_lokasi.nama as namaLokasi, acc_m_user.nama as namaUser, acc_m_akun.kode as kodeAkun, acc_m_akun.nama as namaAkun")
         ->from("acc_pemasukan")
-        ->join("join", "m_user", "acc_pemasukan.created_by = m_user.id")
-        ->join("join", "m_akun", "acc_pemasukan.m_akun_id = m_akun.id")
-        ->join("join", "m_lokasi", "m_lokasi.id = acc_pemasukan.m_lokasi_id")
+        ->join("join", "acc_m_user", "acc_pemasukan.created_by = acc_m_user.id")
+        ->join("join", "acc_m_akun", "acc_pemasukan.m_akun_id = acc_m_akun.id")
+        ->join("join", "acc_m_lokasi", "acc_m_lokasi.id = acc_pemasukan.m_lokasi_id")
         ->orderBy('acc_pemasukan.tanggal DESC')
         ->orderBy('acc_pemasukan.created_at DESC');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);

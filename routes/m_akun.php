@@ -70,7 +70,7 @@ $app->get('/acc/m_akun/getSaldoAwal', function ($request, $response) {
         ->from('acc_m_akun')
         ->leftJoin('acc_trans_detail', 
             'acc_trans_detail.m_lokasi_id = ' . $params['m_lokasi_id'] . ' and 
-            acc_trans_detail.m_akun_id = m_akun.id and
+            acc_trans_detail.m_akun_id = acc_m_akun.id and
             acc_trans_detail.reff_type = "Saldo Awal" and
             acc_trans_detail.keterangan = "Saldo Awal"')
         ->where("acc_m_akun.is_deleted", "=", 0)
@@ -207,7 +207,7 @@ $app->post('/acc/m_akun/create', function ($request, $response) {
             $data['tipe'] = isset($akun->tipe) ? $akun->tipe : '';
         }
 
-        $model = $sql->insert("m_akun", $data);
+        $model = $sql->insert("acc_m_akun", $data);
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -671,7 +671,7 @@ $app->get('/acc/m_akun/export', function ($request, $response) {
     array_multisort($kode_short, SORT_ASC, $array_gabung);
 
     //load themeplate
-    $path        = 'upload/format/format_akun.xls';
+    $path        = 'acc/landaacc/upload/format_akun.xls';
     $objReader   = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
 
@@ -817,6 +817,32 @@ $app->get('/acc/m_akun/akunDetail', function ($request, $response){
     $models = $db->select("*")->from("acc_m_akun")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
+            ->findAll();
+    return successResponse($response, [
+      'list'        => $models
+    ]);
+});
+
+$app->get('/acc/m_akun/akunHutang', function ($request, $response){
+    $db = $this->db;
+    $models = $db->select("*")->from("acc_m_akun")
+            ->customWhere("tipe IN('Hutang Lancar', 'Hutang Tidak Lancar')")
+            ->where("is_tipe", "=", 0)
+            ->where("is_deleted", "=", 0)
+            
+            ->findAll();
+    return successResponse($response, [
+      'list'        => $models
+    ]);
+});
+
+$app->get('/acc/m_akun/akunPiutang', function ($request, $response){
+    $db = $this->db;
+    $models = $db->select("*")->from("acc_m_akun")
+            ->customWhere("tipe IN('Piutang Usaha', 'Piutang Lain')")
+            ->where("is_tipe", "=", 0)
+            ->where("is_deleted", "=", 0)
+            
             ->findAll();
     return successResponse($response, [
       'list'        => $models
