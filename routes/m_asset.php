@@ -97,7 +97,7 @@ $app->get('/acc/m_asset/getAkun', function ($request, $response) {
     $params = $request->getParams();
 
     $sql = $this->db;
-    $sql->select("*")->from("m_akun")
+    $sql->select("*")->from("acc_m_akun")
         ->where("is_deleted", "=", 0)
         ->andWhere("is_tipe", "=", 0);
     $models = $sql->findAll();
@@ -115,9 +115,9 @@ $app->get('/acc/m_asset/index', function ($request, $response) {
     $limit  = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_asset.*,m_lokasi.nama as nm_lokasi,acc_umur_ekonomis.nama as nama_umur, acc_umur_ekonomis.tahun as tahun_umur, acc_umur_ekonomis.persentase as persentase_umur")
+    $db->select("acc_asset.*,acc_m_akun.nama as nm_lokasi,acc_umur_ekonomis.nama as nama_umur, acc_umur_ekonomis.tahun as tahun_umur, acc_umur_ekonomis.persentase as persentase_umur")
         ->from("acc_asset")
-        ->leftJoin("m_lokasi", "m_lokasi.id = acc_asset.lokasi_id")
+        ->leftJoin("acc_m_akun", "acc_m_akun.id = acc_asset.lokasi_id")
         ->leftJoin("acc_umur_ekonomis", "acc_umur_ekonomis.id = acc_asset.umur_ekonomis")
         ->orderBy('acc_asset.id DESC');
 
