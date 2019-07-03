@@ -154,7 +154,7 @@ $app->get('/acc/l_budgeting/exportExcel', function ($request, $response) {
       
     }
 //    echo json_encode($getAkun);die();
-    $path        = 'acc/landa-acc/upload/format_budgeting.xls';
+    $path        = 'acc/landaacc/upload/format_budgeting.xls';
     $objReader   = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
     

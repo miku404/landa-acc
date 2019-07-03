@@ -299,7 +299,7 @@ $app->get('/acc/l_buku_besar/exportExcel', function ($request, $response) {
 //            echo "<pre>", print_r($arr[$key]['detail']), "</pre>";
 //        }
 //        die();
-    $path = 'acc/landa-acc/upload/format_buku_besar.xls';
+    $path = 'acc/landaacc/upload/format_buku_besar.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
     

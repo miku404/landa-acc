@@ -16,8 +16,8 @@ function validasi($data, $custom = array())
 $app->get('/acc/m_supplier/getSupplier', function ($request, $response) {
     $db = $this->db;
     $models = $db->select("*")
-                ->from("m_supplier")
-                ->orderBy('m_supplier.nama')
+                ->from("acc_m_supplier")
+                ->orderBy('acc_m_supplier.nama')
                 ->where("is_deleted", "=", 0)
                 ->findAll();
     return successResponse($response, [
@@ -33,8 +33,8 @@ $app->get('/acc/m_supplier/index', function ($request, $response) {
 
     $db = $this->db;
     $db->select("*")
-        ->from("m_supplier")
-        ->orderBy('m_supplier.nama');
+        ->from("acc_m_supplier")
+        ->orderBy('acc_m_supplier.nama');
 
     if (isset($params['filter'])) {
         $filter = (array) json_decode($params['filter']);
@@ -80,7 +80,7 @@ $app->post('/acc/m_supplier/create', function ($request, $response) {
 
     $validasi = validasi($data);
     if ($validasi === true) {
-        $model = $sql->insert("m_supplier", $params);
+        $model = $sql->insert("acc_m_supplier", $params);
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -102,7 +102,7 @@ $app->post('/acc/m_supplier/update', function ($request, $response) {
 
         
 
-        $model = $db->update("m_supplier", $data, array('id' => $data['id']));
+        $model = $db->update("acc_m_supplier", $data, array('id' => $data['id']));
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -136,7 +136,7 @@ $app->post('/acc/m_supplier/trash', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $model = $db->update("m_supplier", $data, array('id' => $data['id']));
+    $model = $db->update("acc_m_supplier", $data, array('id' => $data['id']));
     if ($model) {
         return successResponse($response, $model);
     } else {
@@ -175,7 +175,7 @@ $app->post('/acc/m_supplier/delete', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $delete = $db->delete('m_supplier', array('id' => $data['id']));
+    $delete = $db->delete('acc_m_supplier', array('id' => $data['id']));
        if ($delete) {
            return successResponse($response, ['data berhasil dihapus']);
        } else {

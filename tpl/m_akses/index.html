@@ -118,6 +118,13 @@
                                     </div>
                                     <div class="list-group-item">
                                         <label class="i-checks">
+                                            <input ng-disabled="is_view" ng-model="form.akses.master_customer" type="checkbox"/>
+                                            <i></i>
+                                            Customer
+                                        </label>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <label class="i-checks">
                                             <input ng-disabled="is_view" ng-model="form.akses.master_supplier" type="checkbox"/>
                                             <i></i>
                                             Supplier
@@ -144,6 +151,20 @@
                                             <input ng-disabled="is_view" ng-model="form.akses.transaksi_saldo_awal" type="checkbox"/>
                                             <i></i>
                                             Saldo Awal
+                                        </label>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <label class="i-checks">
+                                            <input ng-disabled="is_view" ng-model="form.akses.transaksi_saldo_awal_hutang" type="checkbox"/>
+                                            <i></i>
+                                            Saldo Awal Hutang
+                                        </label>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <label class="i-checks">
+                                            <input ng-disabled="is_view" ng-model="form.akses.transaksi_saldo_awal_piutang" type="checkbox"/>
+                                            <i></i>
+                                            Saldo Awal Piutang
                                         </label>
                                     </div>
                                     <div class="list-group-item">
@@ -205,6 +226,13 @@
                                             <input ng-disabled="is_view" ng-model="form.akses.laporan_buku_besar" type="checkbox"/>
                                             <i></i>
                                             Buku Besar
+                                        </label>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <label class="i-checks">
+                                            <input ng-disabled="is_view" ng-model="form.akses.laporan_neraca" type="checkbox"/>
+                                            <i></i>
+                                            Neraca
                                         </label>
                                     </div>
                                     <div class="list-group-item">

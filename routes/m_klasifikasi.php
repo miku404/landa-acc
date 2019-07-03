@@ -21,47 +21,6 @@ function validasi($data, $custom = array())
 $app->get('/acc/m_klasifikasi/index', function ($request, $response) {
     $params = $request->getParams();
 
-    // $sort   = "id DESC";
-    // $offset = isset($params['offset']) ? $params['offset'] : 0;
-    // $limit  = isset($params['limit']) ? $params['limit'] : 10;
-    //
-    // $db = $this->db;
-    //
-    // $db->select("acc_akun.*, induk.kode as kode_induk")
-    // ->from('acc_akun')
-    // ->leftJoin("acc_akun as induk", "induk.id = acc_akun.parent_id")
-    // ->where('acc_akun.is_tipe','=', 1);
-    //
-    // /** set parameter */
-    // if (isset($params['filter'])) {
-    //     $filter = (array) json_decode($params['filter']);
-    //     foreach ($filter as $key => $val) {
-    //       if ($key == 'is_deleted') {
-    //         $db->where('acc_akun.is_deleted', '=', $val);
-    //       } elseif ($key=="nama") {
-    //           $db->where('acc_akun.nama', 'LIKE', $val);
-    //       }elseif ($key=="kode") {
-    //         $db->where('acc_akun.kode', 'LIKE', $val);
-    //       }
-    //     }
-    // }
-    //
-    // $db->orderBy('id asc');
-    //
-    // /** Set limit */
-    // if (!empty($limit)) {
-    //     $db->limit($limit);
-    // }
-    //
-    // /** Set offset */
-    // if (!empty($offset)) {
-    //     $db->offset($offset);
-    // }
-    //
-    // /** Set sorting */
-    // if (!empty($params['sort'])) {
-    //     $db->sort($sort);
-    // }
 
     $filter = array();
     $sort = "acc_m_akun.kode ASC";
@@ -95,11 +54,11 @@ $app->get('/acc/m_klasifikasi/index', function ($request, $response) {
         $filter = (array) json_decode($params['filter']);
         foreach ($filter as $key => $val) {
           if ($key == 'is_deleted') {
-            $db->where('m_akun.is_deleted', '=', $val);
+            $db->where('acc_m_akun.is_deleted', '=', $val);
           } elseif ($key=="nama") {
-              $db->where('m_akun.nama', 'LIKE', $val);
+              $db->where('acc_m_akun.nama', 'LIKE', $val);
           }elseif ($key=="kode") {
-            $db->where('m_akun.kode', 'LIKE', $val);
+            $db->where('acc_m_akun.kode', 'LIKE', $val);
           }
         }
     }
@@ -116,7 +75,7 @@ $app->get('/acc/m_klasifikasi/index', function ($request, $response) {
         $arr[$key]['parent_id']           = $arr[$key]['parent_id'] == 0 ? (string) $value->parent_id : (int) $value->parent_id;
         // $arr[$key]['kode']             = kodeAkun($value->kode);
         $arr[$key]['kode']                = $value->kode;
-        $arr[$key]['is_kasir']            = $value->is_kasir == 1 ? true : false;
+//        $arr[$key]['is_kasir']            = $value->is_kasir == 1 ? true : false;
         // $arr[$key]['is_pendapatan_usaha'] = (string) $value->is_pendapatan_usaha;
         //
         // if ($value->tipe == 'Payable' || $value->tipe == 'Hutang Lancar' || $value->tipe == 'Hutang Tidak Lancar') {
@@ -150,11 +109,11 @@ $app->get('/acc/m_klasifikasi/index', function ($request, $response) {
 
 $app->get('/acc/m_klasifikasi/list', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("m_akun.*")
-        ->from('m_akun')
+    $models = $db->select("acc_m_akun.*")
+        ->from('acc_m_akun')
         ->where('is_tipe', '=', '1')
         ->where('is_deleted', '=', 0)
-        ->orderBy('m_akun.kode ASC')
+        ->orderBy('acc_m_akun.kode ASC')
         ->findAll();
     return successResponse($response, ['list' => $models]);
 });
@@ -179,7 +138,7 @@ $app->post('/acc/m_klasifikasi/create', function ($request, $response) {
             $data['level'] = setLevelTipeAkun($data['parent_id']);
         }
 
-        $model = $db->insert("m_akun", $data);
+        $model = $db->insert("acc_m_akun", $data);
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -205,11 +164,11 @@ $app->post('/acc/m_klasifikasi/update', function ($request, $response) {
         //     $data['level'] = setLevelTipeAkun($data['parent_id']);
         // }
 
-        $model = $db->update("m_akun", $data, array('id' => $data['id']));
+        $model = $db->update("acc_m_akun", $data, array('id' => $data['id']));
 
         /** Update tipe di semua akun */
-        $db->update('m_akun', ['tipe' => $model->tipe], ['parent_id' => $model->id]);
-        $db->update('m_akun', ['tipe_arus' => $model->tipe_arus], ['parent_id' => $model->id]);
+        $db->update('acc_m_akun', ['tipe' => $model->tipe], ['parent_id' => $model->id]);
+        $db->update('acc_m_akun', ['tipe_arus' => $model->tipe_arus], ['parent_id' => $model->id]);
 
         if ($model) {
             return successResponse($response, $model);
@@ -231,7 +190,7 @@ $app->post('/acc/m_klasifikasi/trash', function ($request, $response) {
     $datas['is_deleted'] = $data['is_deleted'];
     $datas['tgl_nonaktif'] = date('Y-m-d');
     try {
-        $model = $db->update("m_akun", $datas, array('id' => $data['id']));
+        $model = $db->update("acc_m_akun", $datas, array('id' => $data['id']));
         return successResponse($response, $model);
     } catch (Exception $e) {
         return unprocessResponse($response, ['Data Gagal Di Simpan']);
@@ -243,13 +202,13 @@ $app->post('/acc/m_klasifikasi/delete', function ($request, $response) {
 
     $db = $this->db;
     
-    $cek = $db->select("*")->from("m_akun")->where("parent_id", "=", $data['id'])->findAll();
+    $cek = $db->select("*")->from("acc_m_akun")->where("parent_id", "=", $data['id'])->findAll();
 
     if (count($cek) > 0) {
         return unprocessResponse($response, ['Data Akun Masih Mempunyai Sub Akun']);
     } else {
         try {
-            $delete = $db->delete('m_akun', array('id' => $data['id']));
+            $delete = $db->delete('acc_m_akun', array('id' => $data['id']));
             return successResponse($response, ['data berhasil dihapus']);
         } catch (Exception $e) {
             return unprocessResponse($response, ['data gagal dihapus']);
@@ -295,11 +254,11 @@ $app->post('/acc/m_klasifikasi/import', function ($request, $response) {
                     $data['is_tipe'] = 1;
                     $data['is_deleted'] = 0;
                     $tes[] = $data;
-                    $cekid = $db->select("*")->from("m_akun")->where("id", "=", $id)->find();
+                    $cekid = $db->select("*")->from("acc_m_akun")->where("id", "=", $id)->find();
                     if($cekid){
-                        $update = $db->update("m_akun", $data, ["id"=>$id]);
+                        $update = $db->update("acc_m_akun", $data, ["id"=>$id]);
                     }else{
-                        $insert = $db->insert("m_akun", $data);
+                        $insert = $db->insert("acc_m_akun", $data);
                     }
                    
                 }
@@ -318,7 +277,7 @@ $app->post('/acc/m_klasifikasi/import', function ($request, $response) {
  */
 $app->get('/acc/m_klasifikasi/export', function ($request, $response) {
 
-    $inputFileName = 'acc/landa-acc//upload/format_tipeakun.xls';
+    $inputFileName = 'acc/landaacc/upload/format_tipeakun.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($inputFileName);
 
