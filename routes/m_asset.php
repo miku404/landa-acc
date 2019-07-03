@@ -115,10 +115,13 @@ $app->get('/acc/m_asset/index', function ($request, $response) {
     $limit  = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_asset.*,acc_m_akun.nama as nm_lokasi,acc_umur_ekonomis.nama as nama_umur, acc_umur_ekonomis.tahun as tahun_umur, acc_umur_ekonomis.persentase as persentase_umur")
+    $db->select("acc_asset.*,acc_m_lokasi.nama as nm_lokasi,acc_umur_ekonomis.nama as nama_umur, acc_umur_ekonomis.tahun as tahun_umur, acc_umur_ekonomis.persentase as persentase_umur, akun_asset.nama as nm_akun_asset, akun_akumulasi.nama as nm_akun_akumulasi, akun_beban.nama as nm_akun_beban")
         ->from("acc_asset")
-        ->leftJoin("acc_m_akun", "acc_m_akun.id = acc_asset.lokasi_id")
+        ->leftJoin("acc_m_lokasi", "acc_m_lokasi.id = acc_asset.lokasi_id")
         ->leftJoin("acc_umur_ekonomis", "acc_umur_ekonomis.id = acc_asset.umur_ekonomis")
+        ->leftJoin("acc_m_akun akun_asset", "akun_asset.id = acc_asset.akun_asset_id")
+        ->leftJoin("acc_m_akun akun_akumulasi", "akun_akumulasi.id = acc_asset.akun_akumulasi_id")
+        ->leftJoin("acc_m_akun akun_beban", "akun_beban.id = acc_asset.akun_beban_id")
         ->orderBy('acc_asset.id DESC');
 
     if (isset($params['filter'])) {
@@ -148,11 +151,17 @@ $app->get('/acc/m_asset/index', function ($request, $response) {
     $models    = $db->findAll();
     $totalItem = $db->count();
     foreach ($models as $key => $value) {
+        if ($value->lokasi_id==-1) {
+            $value->lokasi = ["id" => $value->lokasi_id, "nama" => 'Lainya'];
+        }else{
+            $value->lokasi = ["id" => $value->lokasi_id, "nama" => $value->nm_lokasi];
+        }
         $value->tanggal_beli_format = date("d-m-Y",strtotime($value->tanggal_beli));
-        $value->lokasi = ["id" => $value->lokasi_id, "nama" => $value->nm_lokasi];
         $value->umur = ["id" => $value->umur_ekonomis, "nama" => $value->nama_umur, "tahun" => $value->tahun_umur, "persentase" => $value->persentase_umur];
         $value->persentase = (Float) $value->persentase;
-        $value->akun = ["id"=>"","nama"=>""];
+        $value->akun_asset = ["id"=>$value->akun_asset_id,"nama"=>$value->nm_akun_asset];
+        $value->akun_akumulasi = ["id"=>$value->akun_akumulasi_id,"nama"=>$value->nm_akun_akumulasi];
+        $value->akun_beban = ["id"=>$value->akun_beban_id,"nama"=>$value->nm_akun_beban];
     }
 //     print_r($models);exit();
 
@@ -178,7 +187,11 @@ $app->post('/acc/m_asset/save', function ($request, $response) {
 
     if ($validasi === true) {
         $data["lokasi_id"]    = $data["lokasi"]["id"];
-        $data["nama_lokasi"] = $data["lokasi"]["nama"];
+        if ($data["lokasi"]["id"]==-1) {
+            $data["nama_lokasi"] = $data["nama_lokasi"];
+        }else{
+            $data["nama_lokasi"] = $data["lokasi"]["nama"];
+        }
         $data["akun_asset_id"]    = $data["akun_asset"]["id"];
         $data["akun_akumulasi_id"]    = $data["akun_akumulasi"]["id"];
         $data["akun_beban_id"]    = $data["akun_beban"]["id"];
