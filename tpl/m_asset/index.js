@@ -171,7 +171,7 @@ app.controller('supplierCtrl', function ($scope, Data, $rootScope, $uibModal, Up
 
     $scope.detail_penyusutan = function(form){
       var modalInstance = $uibModal.open({
-          templateUrl: "../acc-ukdc/api/acc/landa-acc/tpl/m_asset/modal_detail_penyusutan.html",
+          templateUrl: "../acc-ukdc/api/acc/landaacc/tpl/m_asset/modal_detail_penyusutan.html",
           controller: "penyusutanCtrl",
           size: "lg",
           backdrop: "static",
