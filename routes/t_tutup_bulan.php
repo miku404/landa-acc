@@ -26,10 +26,10 @@ $app->get('/acc/t_tutup_bulan/index', function ($request, $response) {
     /** Select Gudang from database */
     $db->select("
       acc_tutup_buku.*,
-      m_user.nama as namaUser
+      acc_m_user.nama as namaUser
       ")
             ->from("acc_tutup_buku")
-            ->leftJoin("m_user", "m_user.id=acc_tutup_buku.created_by")
+            ->leftJoin("acc_m_user", "acc_m_user.id=acc_tutup_buku.created_by")
             ->where("acc_tutup_buku.jenis", "=", "bulan");
     /** Add filter */
     if (isset($params['filter'])) {
@@ -65,8 +65,8 @@ $app->get('/acc/t_tutup_bulan/index', function ($request, $response) {
     // print_r($models);exit();
     $array = [];
     foreach ($models as $key => $val) {
-        $akun_ikhtisar = $db->find("select * from m_akun where id ={$val->akun_ikhtisar_id}");
-        $akun_pemindaian = $db->find("select * from m_akun where id ={$val->akun_pemindahan_modal_id}");
+        $akun_ikhtisar = $db->find("select * from acc_m_akun where id ={$val->akun_ikhtisar_id}");
+        $akun_pemindaian = $db->find("select * from acc_m_akun where id ={$val->akun_pemindahan_modal_id}");
         $tgl = date('Y-m-d', strtotime($val->tahun . '-' . $val->bulan . '-01'));
         $array[$key] = (array) $val;
         $array[$key]['akun_ikhtisar'] = $akun_ikhtisar;
@@ -111,7 +111,7 @@ $app->get('/acc/t_tutup_bulan/getDetail', function ($request, $response) {
         $models[$tipe1]['nama'] = $tipe2; 
         
         $getAkun = $db->select("*")
-                ->from("m_akun")
+                ->from("acc_m_akun")
                 ->where("tipe", "LIKE", $tipe2)
                 ->where("is_tipe", "=", 0)
                 ->orderBy("kode")
@@ -327,7 +327,7 @@ $app->post('/acc/t_pengeluaran/trash', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $model = $db->update("t_pengeluaran", $data, array('id' => $data['id']));
+    $model = $db->update("t_tutup_buku", $data, array('id' => $data['id']));
     if ($model) {
         return successResponse($response, $model);
     } else {

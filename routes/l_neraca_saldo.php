@@ -156,7 +156,7 @@ $app->get('/acc/l_neraca_saldo/exportExcel', function ($request, $response) {
 //            echo "<pre>", print_r($arr[$key]['detail']), "</pre>";
 //        }
 //        die();
-    $path = 'acc/landa-acc/upload/format_neraca_saldo.xls';
+    $path = 'acc/landaacc/upload/format_neraca_saldo.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
 

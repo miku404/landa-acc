@@ -14,13 +14,24 @@ function validasi($data, $custom = array())
 $app->get('/acc/m_lokasi/getLokasi', function ($request, $response) {
     $db = $this->db;
     $models = $db->select("*")
-                ->from("m_lokasi")
-                ->orderBy('m_lokasi.nama')
+                ->from("acc_m_lokasi")
+                ->orderBy('acc_m_lokasi.nama')
                 ->where("is_deleted", "=", 0)
                 ->findAll();
     return successResponse($response, [
       'list'        => $models
     ]);
+});
+
+$app->get('/acc/m_lokasi/list', function ($request, $response){
+    $db = $this->db;
+    $models = $db->select("acc_m_lokasi.*")
+        ->from('acc_m_lokasi')
+//        ->where('is_parent', '=', '1')
+        ->where('is_deleted', '=', 0)
+        ->orderBy('acc_m_lokasi.kode ASC')
+        ->findAll();
+    return successResponse($response, ['list' => $models]);
 });
 
 $app->get('/acc/m_lokasi/index', function ($request, $response) {
@@ -31,9 +42,9 @@ $app->get('/acc/m_lokasi/index', function ($request, $response) {
 
     $db = $this->db;
     $db->select("*")
-        ->from("m_lokasi")
-        ->orderBy('m_lokasi.nama')
-        ->where("is_deleted", "=", 1);
+        ->from("acc_m_lokasi")
+        ->orderBy('acc_m_lokasi.nama')
+        ->where("is_deleted", "=", 0);
 
     if (isset($params['filter'])) {
         $filter = (array) json_decode($params['filter']);
@@ -59,6 +70,11 @@ $app->get('/acc/m_lokasi/index', function ($request, $response) {
 
     $models    = $db->findAll();
     $totalItem = $db->count();
+    
+    foreach($models as $key => $val){
+//        $spasi                            = ($val->level == 1) ? '' : str_repeat("···", $val->level - 1);
+//        $val->nama_lengkap        = $spasi . $val->kode . ' - ' . $val->nama;
+    }
 //     print_r($models);exit();
     
 //      print_r($arr);exit();
@@ -71,15 +87,30 @@ $app->get('/acc/m_lokasi/index', function ($request, $response) {
 
 
 
-$app->post('/acc/m_lokasi/create', function ($request, $response) {
+$app->post('/acc/m_lokasi/save', function ($request, $response) {
 
     $params = $request->getParams();
-    $data   = $params;
+    
     $sql    = $this->db;
 
-    $validasi = validasi($data);
+    $validasi = validasi($params);
     if ($validasi === true) {
-        $model = $sql->insert("m_lokasi", $params);
+        if($params['parent_id'] == 0){
+//            $params['is_parent'] = 1;
+            $params['level'] = 1;
+        }else{
+//            $params['is_parent'] = 0;
+            $getlevel = $sql->select("*")->from("acc_m_lokasi")->where("id", "=", $params['parent_id'])->find();
+//            die();
+            $params['level'] = $getlevel->level + 1;
+        }
+//        print_r($params);die();
+        if(isset($params['id']) && !empty($params['id'])){
+            $model = $sql->update("acc_m_lokasi", $params, ["id" => $params['id']]);
+        }else{
+            $model = $sql->insert("acc_m_lokasi", $params);
+        }
+        
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -101,7 +132,7 @@ $app->post('/acc/m_lokasi/update', function ($request, $response) {
 
         
 
-        $model = $db->update("m_lokasi", $data, array('id' => $data['id']));
+        $model = $db->update("acc_m_lokasi", $data, array('id' => $data['id']));
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -135,7 +166,7 @@ $app->post('/acc/m_lokasi/trash', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $model = $db->update("m_lokasi", $data, array('id' => $data['id']));
+    $model = $db->update("acc_m_lokasi", $data, array('id' => $data['id']));
     if ($model) {
         return successResponse($response, $model);
     } else {
@@ -174,7 +205,7 @@ $app->post('/acc/m_lokasi/delete', function ($request, $response) {
 //       return unprocessResponse($response, ['Data Akun Masih Di Gunakan Pada Transaksi Penggajian']);
 //    }
 
-    $delete = $db->delete('m_lokasi', array('id' => $data['id']));
+    $delete = $db->delete('acc_m_lokasi', array('id' => $data['id']));
        if ($delete) {
            return successResponse($response, ['data berhasil dihapus']);
        } else {

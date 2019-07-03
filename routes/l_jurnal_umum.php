@@ -179,7 +179,7 @@ $app->get('/acc/l_jurnal_umum/exportExcel', function ($request, $response) {
         usort($arr, "cmp");
         
         
-    $path = 'acc/landa-acc/upload/format_jurnal_umum.xls';
+    $path = 'acc/landaacc/upload/format_jurnal_umum.xls';
     $objReader = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
 

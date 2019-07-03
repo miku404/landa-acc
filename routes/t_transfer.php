@@ -31,7 +31,7 @@ $app->get('/acc/t_transfer/kode/{kode}', function ($request, $response) {
 
 $app->get('/acc/t_transfer/akunKas', function ($request, $response){
     $db = $this->db;
-    $models = $db->select("*")->from("m_akun")
+    $models = $db->select("*")->from("acc_m_akun")
             ->where("tipe", "=", "Cash & Bank")
             ->where("is_tipe", "=", 0)
             ->where("is_deleted", "=", 0)
@@ -50,12 +50,12 @@ $app->get('/acc/t_transfer/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_transfer.*, m_lokasi.nama as namaLokasi, m_lokasi.kode as kodeLokasi, m_user.nama as namaUser, akun2.id as idTujuan, akun2.nama as namaTujuan, akun2.kode as kodeTujuan, akun1.id as idAsal, akun1.nama as namaAsal, akun1.kode as kodeAsal")
+    $db->select("acc_transfer.*, acc_m_lokasi.nama as namaLokasi, acc_m_lokasi.kode as kodeLokasi, acc_m_user.nama as namaUser, akun2.id as idTujuan, akun2.nama as namaTujuan, akun2.kode as kodeTujuan, akun1.id as idAsal, akun1.nama as namaAsal, akun1.kode as kodeAsal")
         ->from("acc_transfer")
-        ->join("join", "m_user", "acc_transfer.created_by = m_user.id")
-        ->join("join", "m_akun akun1", "acc_transfer.m_akun_asal_id = akun1.id")
-        ->join("join", "m_akun akun2", "acc_transfer.m_akun_tujuan_id = akun2.id")
-        ->join("join", "m_lokasi", "acc_transfer.m_lokasi_id = m_lokasi.id")
+        ->join("join", "acc_m_user", "acc_transfer.created_by = acc_m_user.id")
+        ->join("join", "acc_m_akun akun1", "acc_transfer.m_akun_asal_id = akun1.id")
+        ->join("join", "acc_m_akun akun2", "acc_transfer.m_akun_tujuan_id = akun2.id")
+        ->join("join", "acc_m_lokasi", "acc_transfer.m_lokasi_id = acc_m_lokasi.id")
         ->orderBy('acc_transfer.no_urut');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);
 

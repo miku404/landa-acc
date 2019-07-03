@@ -13,10 +13,24 @@ function validasi($data, $custom = array())
     return $cek;
 }
 
+function validasiSaldo($data, $custom = array())
+{
+    $validasi = array(
+        'tanggal' => 'required',
+        'm_lokasi_id'      => 'required',
+        // 'tipe' => 'required',
+    );
+    GUMP::set_field_name("m_lokasi_id", "Lokasi");
+    $cek = validate($data, $validasi, $custom);
+    return $cek;
+}
+
 $app->post('/acc/m_akun/saveSaldoAwal', function ($request, $response) {
     $params = $request->getParams();
 //    print_r($params['form']);die();
-    if (isset($params['form']['tanggal']) && !empty($params['form']['tanggal'])) {
+    $validasi = validasiSaldo($params['form']);
+//    print_r($validasi);die();
+    if ($validasi === true) {
         $tanggal   = date("Y-m-d", strtotime($params['form']['tanggal']));
         $m_lokasi_id = $params['form']['m_lokasi_id'];
 
@@ -52,9 +66,11 @@ $app->post('/acc/m_akun/saveSaldoAwal', function ($request, $response) {
         }
 
         return unprocessResponse($response, ['Silahkan buat akun terlebih dahulu']);
+    }else{
+        return unprocessResponse($response, $validasi);
     }
 
-    return unprocessResponse($response, ['Tanggal tidak boleh kosong']);
+    
 });
 
 $app->get('/acc/m_akun/getSaldoAwal', function ($request, $response) {
@@ -70,7 +86,7 @@ $app->get('/acc/m_akun/getSaldoAwal', function ($request, $response) {
         ->from('acc_m_akun')
         ->leftJoin('acc_trans_detail', 
             'acc_trans_detail.m_lokasi_id = ' . $params['m_lokasi_id'] . ' and 
-            acc_trans_detail.m_akun_id = m_akun.id and
+            acc_trans_detail.m_akun_id = acc_m_akun.id and
             acc_trans_detail.reff_type = "Saldo Awal" and
             acc_trans_detail.keterangan = "Saldo Awal"')
         ->where("acc_m_akun.is_deleted", "=", 0)
@@ -207,7 +223,7 @@ $app->post('/acc/m_akun/create', function ($request, $response) {
             $data['tipe'] = isset($akun->tipe) ? $akun->tipe : '';
         }
 
-        $model = $sql->insert("m_akun", $data);
+        $model = $sql->insert("acc_m_akun", $data);
         if ($model) {
             return successResponse($response, $model);
         } else {
@@ -671,7 +687,7 @@ $app->get('/acc/m_akun/export', function ($request, $response) {
     array_multisort($kode_short, SORT_ASC, $array_gabung);
 
     //load themeplate
-    $path        = 'upload/format/format_akun.xls';
+    $path        = 'acc/landaacc/upload/format_akun.xls';
     $objReader   = PHPExcel_IOFactory::createReader('Excel5');
     $objPHPExcel = $objReader->load($path);
 
@@ -821,4 +837,43 @@ $app->get('/acc/m_akun/akunDetail', function ($request, $response){
     return successResponse($response, [
       'list'        => $models
     ]);
+});
+
+$app->get('/acc/m_akun/akunHutang', function ($request, $response){
+    $db = $this->db;
+    $models = $db->select("*")->from("acc_m_akun")
+            ->customWhere("tipe IN('Hutang Lancar', 'Hutang Tidak Lancar')")
+            ->where("is_tipe", "=", 0)
+            ->where("is_deleted", "=", 0)
+            
+            ->findAll();
+    return successResponse($response, [
+      'list'        => $models
+    ]);
+});
+
+$app->get('/acc/m_akun/akunPiutang', function ($request, $response){
+    $db = $this->db;
+    $models = $db->select("*")->from("acc_m_akun")
+            ->customWhere("tipe IN('Piutang Usaha', 'Piutang Lain')")
+            ->where("is_tipe", "=", 0)
+            ->where("is_deleted", "=", 0)
+            
+            ->findAll();
+    return successResponse($response, [
+      'list'        => $models
+    ]);
+});
+
+$app->get('/acc/m_akun/getTanggalSetting', function ($request, $response){
+    $db = $this->db;
+    $models = $db->select("*")->from("acc_m_setting")
+//            ->customWhere("tipe IN('Piutang Usaha', 'Piutang Lain')")
+//            ->where("is_tipe", "=", 0)
+//            ->where("is_deleted", "=", 0)
+            ->orderBy("id DESC")
+            
+            ->find();
+    $models->tanggal = date('Y-m-d H:i:s', strtotime($models->tanggal . ' -1 day'));
+    return successResponse($response, $models);
 });

@@ -10,9 +10,12 @@ $app->post('/acc/t_jurnal_umum/upload/{folder}', function ($request, $response) 
         $id_dokumen = $sql->find("select * from acc_dokumen_foto order by id desc");
         $gid = (isset($id_dokumen->id)) ? $id_dokumen->id + 1 : 1;
         $newName = $gid . "_" . urlParsing($_FILES['file']['name']);
-        $uploadPath = "acc/landa-acc/upload/" . $folder . DIRECTORY_SEPARATOR . $newName;
-
-        move_uploaded_file($tempPath, $uploadPath);
+        $uploadPath = "file/jurnal-umum/" . date('Y') ."/".str_replace("0", "", date("m"));
+//        echo $uploadPath;die();
+        if(!is_dir($uploadPath)){
+            mkdir($uploadPath, 0777, true);
+        }
+        move_uploaded_file($tempPath, $uploadPath. DIRECTORY_SEPARATOR . $newName);
 
         if ($params['id'] == "undefined" || empty($params['id'])) {
             $pengeluaran_id = $sql->find("select * from acc_jurnal order by id desc");
@@ -49,7 +52,7 @@ $app->get('/acc/t_jurnal_umum/listgambar/{id}', function ($request, $response) {
     $id = $request->getAttribute('id');
     $sql = $this->db;
     $model = $sql->findAll("select * from acc_dokumen_foto where acc_jurnal_id={$id}");
-    return successResponse($response, $model);
+    return successResponse($response, ["model"=>$model, "url"=>"api/file/jurnal-umum/".date("Y")."/".str_replace("0", "", date("m"))."/"]);
 });
 
 $app->post('/acc/t_jurnal_umum/removegambar', function ($request, $response) {
@@ -57,7 +60,7 @@ $app->post('/acc/t_jurnal_umum/removegambar', function ($request, $response) {
     $sql = $this->db;
 
     $delete = $sql->delete('acc_dokumen_foto', array('id' => $params['id'], "img" => $params['img']));
-    unlink(__DIR__ . "/../upload/bukti/" . $params['img']);
+    unlink(__DIR__ . "/../../../file/jurnal-umum/" . date('Y') ."/". str_replace("0", "", date("m")) ."/". $params['img']);
 });
 
 
@@ -94,9 +97,9 @@ $app->get('/acc/t_jurnal_umum/getDetail', function ($request, $response){
     $params = $request->getParams();
 //    print_r($params);die();
     $db = $this->db;
-    $models = $db->select("acc_jurnal_det.*, m_akun.kode as kodeAkun, m_akun.nama as namaAkun")
+    $models = $db->select("acc_jurnal_det.*, acc_m_akun.kode as kodeAkun, acc_m_akun.nama as namaAkun")
             ->from("acc_jurnal_det")
-            ->join("join", "m_akun", "m_akun.id = acc_jurnal_det.m_akun_id")
+            ->join("join", "acc_m_akun", "acc_m_akun.id = acc_jurnal_det.m_akun_id")
             ->where("acc_jurnal_id", "=", $params['id'])
 //            ->where("acc_pemasukan_det.is_deleted", "=", 0)
             ->findAll();
@@ -116,10 +119,10 @@ $app->get('/acc/t_jurnal_umum/index', function ($request, $response) {
     $limit    = isset($params['limit']) ? $params['limit'] : 20;
 
     $db = $this->db;
-    $db->select("acc_jurnal.*, m_lokasi.id as idLokasi, m_lokasi.kode as kodeLokasi, m_lokasi.nama as namaLokasi, m_user.nama as namaUser")
+    $db->select("acc_jurnal.*, acc_m_lokasi.id as idLokasi, acc_m_lokasi.kode as kodeLokasi, acc_m_lokasi.nama as namaLokasi, acc_m_user.nama as namaUser")
         ->from("acc_jurnal")
-        ->join("join", "m_user", "acc_jurnal.created_by = m_user.id")
-        ->join("join", "m_lokasi", "m_lokasi.id = acc_jurnal.m_lokasi_id")
+        ->join("join", "acc_m_user", "acc_jurnal.created_by = acc_m_user.id")
+        ->join("join", "acc_m_lokasi", "acc_m_lokasi.id = acc_jurnal.m_lokasi_id")
         ->orderBy('acc_jurnal.no_urut');
 //        ->where("acc_pemasukan.is_deleted", "=", 0);
 
@@ -128,7 +131,7 @@ $app->get('/acc/t_jurnal_umum/index', function ($request, $response) {
 
         foreach ($filter as $key => $val) {
             if ($key == 'is_deleted') {
-                $db->where("is_deleted", '=', $val);
+                $db->where("acc_jurnal.is_deleted", '=', $val);
             }else{
                 $db->where($key, 'LIKE', $val);
             }
